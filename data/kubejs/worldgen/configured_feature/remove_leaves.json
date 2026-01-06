@@ -1,0 +1,54 @@
+{
+    "type": "minecraft:ore",
+    "config": {
+        "size": 64,
+        "discard_chance_on_air_exposure": 0.0,
+        "targets": [
+            {
+                "target": {
+                    "predicate_type": "minecraft:tag_match",
+                    "tag": "minecraft:leaves"
+                },
+                "state": {
+                    "Name": "minecraft:air"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:tag_match",
+                    "tag": "biomeswevegone:leaves"
+                },
+                "state": {
+                    "Name": "minecraft:air"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:tag_match",
+                    "tag": "luminousworld:luminous_leaves"
+                },
+                "state": {
+                    "Name": "minecraft:air"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:tag_match",
+                    "tag": "twilightforest:leaves"
+                },
+                "state": {
+                    "Name": "minecraft:air"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:tag_match",
+                    "tag": "enderscape:leaves"
+                },
+                "state": {
+                    "Name": "minecraft:air"
+                }
+            }
+        ]
+    }
+}

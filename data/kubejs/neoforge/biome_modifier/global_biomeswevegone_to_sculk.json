@@ -1,0 +1,6 @@
+{
+    "type": "neoforge:add_features",
+    "biomes": "#minecraft:is_overworld",
+    "features": "kubejs:biomeswevegone_to_sculk_placed",
+    "step": "top_layer_modification"
+}

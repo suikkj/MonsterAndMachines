@@ -1,0 +1,54 @@
+{
+    "type": "minecraft:ore",
+    "config": {
+        "size": 64,
+        "discard_chance_on_air_exposure": 0.0,
+        "targets": [
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "minecraft:short_grass"
+                },
+                "state": {
+                    "Name": "deeperdarker:sculk_tendrils"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "minecraft:tall_grass"
+                },
+                "state": {
+                    "Name": "deeperdarker:sculk_tendrils"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "minecraft:fern"
+                },
+                "state": {
+                    "Name": "deeperdarker:sculk_tendrils"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "minecraft:large_fern"
+                },
+                "state": {
+                    "Name": "deeperdarker:sculk_tendrils"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:tag_match",
+                    "tag": "minecraft:flowers"
+                },
+                "state": {
+                    "Name": "deeperdarker:sculk_tendrils"
+                }
+            }
+        ]
+    }
+}

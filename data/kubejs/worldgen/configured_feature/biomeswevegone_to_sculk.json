@@ -1,0 +1,90 @@
+{
+    "type": "minecraft:ore",
+    "config": {
+        "size": 64,
+        "discard_chance_on_air_exposure": 0.0,
+        "targets": [
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:lush_grass_block"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:lush_dirt"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:podzol_dacite"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:overgrown_dacite"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:overgrown_stone"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:white_podzol_dacite"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:white_overgrown_dacite"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:lush_dirt_path"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            },
+            {
+                "target": {
+                    "predicate_type": "minecraft:block_match",
+                    "block": "biomeswevegone:lush_farmland"
+                },
+                "state": {
+                    "Name": "minecraft:sculk"
+                }
+            }
+        ]
+    }
+}

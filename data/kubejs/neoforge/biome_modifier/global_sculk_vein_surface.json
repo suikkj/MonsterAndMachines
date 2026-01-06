@@ -1,0 +1,18 @@
+{
+    "type": "neoforge:add_features",
+    "biomes": {
+        "type": "neoforge:and",
+        "values": [
+            "#minecraft:is_overworld",
+            {
+                "type": "neoforge:not",
+                "value": "#minecraft:is_frozen"
+            }
+        ]
+    },
+    "features": [
+        "kubejs:sculk_vein_surface_placed",
+        "kubejs:sculk_vein_caves_placed"
+    ],
+    "step": "vegetal_decoration"
+}

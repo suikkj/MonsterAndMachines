@@ -1,0 +1,18 @@
+{
+    "type": "neoforge:add_features",
+    "biomes": {
+        "type": "neoforge:and",
+        "values": [
+            "#minecraft:is_overworld",
+            {
+                "type": "neoforge:not",
+                "value": "#minecraft:is_frozen"
+            }
+        ]
+    },
+    "features": [
+        "kubejs:sculk_patch_surface_placed",
+        "kubejs:sculk_patch_caves_placed"
+    ],
+    "step": "surface_structures"
+}

@@ -1,0 +1,11 @@
+{
+    "type": "neoforge:add_features",
+    "biomes": "#minecraft:is_overworld",
+    "features": [
+        "kubejs:mod_plants_to_tendrils_placed",
+        "kubejs:luminous_grass_to_sculk_placed",
+        "kubejs:luminous_savannah_to_sculk_placed",
+        "kubejs:snow_to_sculk_placed"
+    ],
+    "step": "vegetal_decoration"
+}

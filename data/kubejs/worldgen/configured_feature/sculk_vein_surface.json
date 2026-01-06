@@ -1,0 +1,36 @@
+{
+    "type": "minecraft:vegetation_patch",
+    "config": {
+        "surface": "floor",
+        "depth": 1,
+        "vertical_range": 5,
+        "extra_bottom_block_chance": 0.0,
+        "extra_edge_column_chance": 0.0,
+        "vegetation_chance": 0.0,
+        "xz_radius": 12,
+        "replaceable": "#kubejs:sculk_can_replace",
+        "ground_state": {
+            "type": "minecraft:simple_state_provider",
+            "state": {
+                "Name": "minecraft:sculk"
+            }
+        },
+        "vegetation_feature": {
+            "feature": {
+                "type": "minecraft:simple_block",
+                "config": {
+                    "to_place": {
+                        "type": "minecraft:simple_state_provider",
+                        "state": {
+                            "Name": "minecraft:sculk_vein",
+                            "Properties": {
+                                "down": "true"
+                            }
+                        }
+                    }
+                }
+            },
+            "placement": []
+        }
+    }
+}
