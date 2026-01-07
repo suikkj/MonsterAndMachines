@@ -33,9 +33,16 @@ EntityEvents.death(event => {
         // Check if item exists and is not Sophisticated Backpacks
         if (!stack.isEmpty()) {
             var modId = stack.getMod()
-            if (modId !== 'sophisticatedbackpacks' && modId !== 'sophisticatedstorage') {
-                candidates.push({ slot: i, item: stack })
+            // Skip Sophisticated Backpacks/Storage
+            if (modId === 'sophisticatedbackpacks' || modId === 'sophisticatedstorage') {
+                continue
             }
+            // Skip temporary essential items
+            var nbt = stack.getNbt()
+            if (nbt && nbt.getBoolean('essential_temporary') === true) {
+                continue
+            }
+            candidates.push({ slot: i, item: stack })
         }
     }
 
