@@ -111,3 +111,48 @@ craftingTable.addShaped("custom_iron_spell_book", <item:irons_spellbooks:iron_sp
     [<item:minecraft:chain>, <item:ars_nouveau:source_gem>, <item:minecraft:paper>],
     [<item:minecraft:chain>, <item:ars_nouveau:magebloom_fiber>, <item:ars_nouveau:magebloom_fiber>]
 ]);
+
+// ============================================
+// Ancient Iron Ingot - Block Factory's Bosses
+// Iron Bar no centro com 8 Diamantes em volta
+// ============================================
+
+// Adiciona a receita do Ancient Iron Ingot
+// Layout da receita:
+// D D D    (D = Diamond)
+// D I D    (I = Iron Bars)
+// D D D
+craftingTable.addShaped("custom_ancient_iron_ingot", <item:block_factorys_bosses:ancient_iron_ingot>, [
+    [<item:minecraft:diamond>, <item:minecraft:diamond>, <item:minecraft:diamond>],
+    [<item:minecraft:diamond>, <item:minecraft:iron_ingot>, <item:minecraft:diamond>],
+    [<item:minecraft:diamond>, <item:minecraft:diamond>, <item:minecraft:diamond>]
+]);
+
+// ============================================
+// Remoção de receitas - Abyssal Sacrifice e Abyssal Knife
+// ============================================
+
+// Remove a receita do Abyssal Sacrifice
+craftingTable.removeByName("block_factorys_bosses:abyssal_sacrifice");
+
+// Remove a receita do Abyssal Knife
+craftingTable.removeByName("block_factorys_bosses:abyssal_knife");
+
+// ============================================
+// Ironclad Bow - Too Many Bows modificado
+// Troca Iron Ingots por Ancient Iron Ingot
+// ============================================
+
+// Remove a receita original do Ironclad Bow
+craftingTable.removeByName("too_many_bows:ironclad_bow");
+
+// Adiciona a nova receita com Ancient Iron Ingot
+// Layout da receita (baseado na imagem):
+// A S A    (A = Ancient Iron Ingot, S = Stick)
+// S B A    (B = Bow)
+// A S A
+craftingTable.addShaped("custom_ironclad_bow", <item:too_many_bows:ironclad_bow>, [
+    [<item:block_factorys_bosses:ancient_iron_ingot>, <item:block_factorys_bosses:ancient_iron_ingot>, <item:block_factorys_bosses:ancient_iron_ingot>],
+    [<item:block_factorys_bosses:ancient_iron_ingot>, <item:minecraft:bow>, <item:block_factorys_bosses:ancient_iron_ingot>],
+    [<item:block_factorys_bosses:ancient_iron_ingot>, <item:block_factorys_bosses:ancient_iron_ingot>, <item:block_factorys_bosses:ancient_iron_ingot>]
+]);
