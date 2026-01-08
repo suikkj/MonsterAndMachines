@@ -3,7 +3,7 @@
 // Items are removed when player gets within 5 blocks of their corpse
 
 // ============================================
-// PERSISTENT DATA HELPERS
+// HELPER FUNCTIONS (safe - only modify data inside events)
 // ============================================
 
 function getEssentialData(server) {
@@ -18,132 +18,168 @@ function getPlayerEssentials(server, playerName) {
     var data = getEssentialData(server)
     if (!data[playerName]) {
         data[playerName] = {
-            items: [],  // Array of serialized items (with full NBT)
-            deathPos: null,
-            deathDimension: null,
-            hasTemporaryItems: false
+            items: [],
+            deathX: 0,
+            deathY: 0,
+            deathZ: 0,
+            deathDimension: '',
+            hasTemporaryItems: false,
+            temporaryItemIds: []
         }
     }
     return data[playerName]
 }
 
-// ============================================
-// ITEM SERIALIZATION (preserves NBT for spellbooks, etc.)
-// ============================================
-
-function serializeItem(itemStack) {
-    return {
-        id: itemStack.getId(),
-        nbt: itemStack.getNbt() ? itemStack.getNbt().toString() : null,
-        count: itemStack.getCount()
-    }
-}
-
-function deserializeItem(serialized, withTemporaryTag) {
-    var item = Item.of(serialized.id)
-
-    // Restore original NBT
-    if (serialized.nbt) {
-        try {
-            item = Item.of(serialized.id + serialized.nbt)
-        } catch (e) {
-            // Fallback if NBT parsing fails
-            item = Item.of(serialized.id)
+function serializeItemForStorage(itemStack) {
+    try {
+        // In 1.21, use toItemString() which gives SNBT format with all components
+        var snbt = itemStack.toItemString()
+        console.info('[Essential Items] Serialized: ' + snbt.substring(0, 100) + '...')
+        return {
+            snbt: snbt,
+            id: itemStack.getId(),
+            count: itemStack.getCount()
+        }
+    } catch (e) {
+        console.warn('[Essential Items] Serialize error: ' + e)
+        return {
+            snbt: '',
+            id: itemStack.getId(),
+            count: itemStack.getCount()
         }
     }
-
-    item.setCount(serialized.count || 1)
-
-    // Add temporary marker
-    if (withTemporaryTag) {
-        var nbt = item.getNbt() || {}
-        nbt.essential_temporary = true
-        item.setNbt(nbt)
-
-        // Add visual lore
-        var lore = item.getLore() || []
-        lore.unshift(Text.of('§c[Item Essencial Temporário]'))
-        lore.unshift(Text.of('§7Será removido ao recuperar seu corpo'))
-        item.setLore(lore)
-    }
-
-    return item
 }
 
-// ============================================
-// TEMPORARY ITEM CHECK
-// ============================================
+function deserializeItemFromStorage(serialized) {
+    try {
+        // First try to restore from SNBT string (preserves all data)
+        if (serialized.snbt && serialized.snbt.length > 0) {
+            console.info('[Essential Items] Deserializing from SNBT: ' + serialized.snbt.substring(0, 100) + '...')
+            var item = Item.of(serialized.snbt)
+            if (item && !item.isEmpty()) {
+                return item
+            }
+        }
 
-function isTemporaryItem(itemStack) {
-    if (itemStack.isEmpty()) return false
-    var nbt = itemStack.getNbt()
-    if (!nbt) return false
-    return nbt.getBoolean('essential_temporary') === true
+        // Fallback: try old nbtString format (for backwards compatibility)
+        if (serialized.nbtString && serialized.nbtString.length > 0) {
+            console.info('[Essential Items] Trying legacy nbtString format')
+            var nbtString = serialized.nbtString
+            // Try to extract components from old format
+            var componentsMatch = nbtString.match(/components:\{(.+)\},count/)
+            if (componentsMatch && componentsMatch[1]) {
+                var itemString = serialized.id + '[' + componentsMatch[1] + ']'
+                return Item.of(itemString)
+            }
+        }
+
+        // Last fallback: just the item ID
+        console.info('[Essential Items] Falling back to basic item: ' + serialized.id)
+        return Item.of(serialized.id)
+    } catch (e) {
+        console.error('[Essential Items] Deserialize error: ' + e)
+        return Item.of(serialized.id)
+    }
+}
+
+function getTemporaryItemIds(server, playerName) {
+    var essentials = getPlayerEssentials(server, playerName)
+    if (!essentials.temporaryItemIds) {
+        essentials.temporaryItemIds = []
+    }
+    return essentials.temporaryItemIds
+}
+
+function markItemAsTemporary(server, playerName, itemId) {
+    var ids = getTemporaryItemIds(server, playerName)
+    if (ids.indexOf(itemId) === -1) {
+        ids.push(itemId)
+    }
+}
+
+function clearTemporaryItemIds(server, playerName) {
+    var essentials = getPlayerEssentials(server, playerName)
+    essentials.temporaryItemIds = []
 }
 
 function removeTemporaryItems(player) {
     var inventory = player.inventory
     var removed = 0
+    var playerName = player.getName().getString()
+    var ids = getTemporaryItemIds(player.server, playerName)
+
+    if (ids.length === 0) return 0
 
     for (var i = 0; i < inventory.getContainerSize(); i++) {
         var stack = inventory.getItem(i)
-        if (isTemporaryItem(stack)) {
+        if (!stack.isEmpty() && ids.indexOf(stack.getId()) !== -1) {
             inventory.setItem(i, Item.of('minecraft:air'))
             removed++
         }
     }
 
+    clearTemporaryItemIds(player.server, playerName)
     return removed
 }
 
 // ============================================
-// PROXIMITY CHECK (runs every 40 ticks = 2 seconds)
+// PROXIMITY CHECK
 // ============================================
 
 var tickCounter = 0
 
-ServerEvents.tick(event => {
+ServerEvents.tick(function (event) {
     tickCounter++
     if (tickCounter < 40) return
     tickCounter = 0
 
     var server = event.server
-    var data = getEssentialData(server)
+    var persistentData = server.persistentData
 
-    server.getPlayers().forEach(player => {
+    server.getPlayers().forEach(function (player) {
         var playerName = player.getName().getString()
-        var playerData = data[playerName]
+        var prefix = 'essentialDeath_' + playerName + '_'
 
-        if (!playerData || !playerData.hasTemporaryItems) return
-        if (!playerData.deathPos) return
+        // Check if player has death items using NBT
+        var hasDeathItems = persistentData.getBoolean(prefix + 'hasItems')
+        if (!hasDeathItems) return
 
-        // Check if same dimension
-        var currentDim = player.getLevel().dimension().toString()
-        if (currentDim !== playerData.deathDimension) return
+        var deathDim = persistentData.getString(prefix + 'dim')
+        var currentDim = player.level.dimensionKey.toString()
+        if (currentDim !== deathDim) return
 
-        // Check distance
-        var dx = player.getX() - playerData.deathPos.x
-        var dy = player.getY() - playerData.deathPos.y
-        var dz = player.getZ() - playerData.deathPos.z
+        var deathX = persistentData.getDouble(prefix + 'x')
+        var deathY = persistentData.getDouble(prefix + 'y')
+        var deathZ = persistentData.getDouble(prefix + 'z')
+
+        var px = player.getX()
+        var py = player.getY()
+        var pz = player.getZ()
+        var dx = px - deathX
+        var dy = py - deathY
+        var dz = pz - deathZ
         var distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
 
         if (distance <= 5) {
             var removed = removeTemporaryItems(player)
             if (removed > 0) {
-                player.tell(Text.of('§aVocê recuperou seu corpo! §7' + removed + ' item(ns) essencial(is) temporário(s) removido(s).'))
+                player.tell(Text.of('§aCorpo recuperado! §7' + removed + ' item(ns) removido(s).'))
             }
-            playerData.hasTemporaryItems = false
-            playerData.deathPos = null
-            playerData.deathDimension = null
+            // Clear death position using NBT
+            persistentData.putBoolean(prefix + 'hasItems', false)
+            persistentData.putDouble(prefix + 'x', 0)
+            persistentData.putDouble(prefix + 'y', 0)
+            persistentData.putDouble(prefix + 'z', 0)
+            persistentData.putString(prefix + 'dim', '')
         }
     })
 })
 
 // ============================================
-// DEATH EVENT - Save death position
+// DEATH EVENT
 // ============================================
 
-EntityEvents.death(event => {
+EntityEvents.death(function (event) {
     var entity = event.entity
     if (!entity.isPlayer()) return
 
@@ -151,173 +187,215 @@ EntityEvents.death(event => {
     var playerName = player.getName().getString()
     var playerData = getPlayerEssentials(player.server, playerName)
 
-    // Only save if player has essential items configured
-    if (playerData.items.length === 0) return
+    console.info('[Essential Items] Death event for ' + playerName)
+    console.info('[Essential Items] Items count: ' + (playerData.items ? playerData.items.length : 0))
 
-    // Save death position
-    playerData.deathPos = {
-        x: player.getX(),
-        y: player.getY(),
-        z: player.getZ()
+    if (!playerData.items || playerData.items.length === 0) {
+        console.info('[Essential Items] No items configured, skipping death registration')
+        return
     }
-    playerData.deathDimension = player.getLevel().dimension().toString()
+
+    // Store coordinates directly in server persistentData using putDouble
+    var data = server.persistentData
+    var prefix = 'essentialDeath_' + playerName + '_'
+
+    data.putDouble(prefix + 'x', player.getX())
+    data.putDouble(prefix + 'y', player.getY())
+    data.putDouble(prefix + 'z', player.getZ())
+    data.putString(prefix + 'dim', player.level.dimensionKey.toString())
+    data.putBoolean(prefix + 'hasItems', true)
+
+    console.info('[Essential Items] Death position saved: ' + player.getX() + ', ' + player.getY() + ', ' + player.getZ())
 })
 
 // ============================================
-// RESPAWN EVENT - Give temporary essential items
+// RESPAWN EVENT
 // ============================================
 
-PlayerEvents.respawn(event => {
+PlayerEvents.respawned(function (event) {
     var player = event.player
     var playerName = player.getName().getString()
     var playerData = getPlayerEssentials(player.server, playerName)
 
-    // Only if player has essential items configured
-    if (playerData.items.length === 0) return
+    // Read death position using NBT methods
+    var data = player.server.persistentData
+    var prefix = 'essentialDeath_' + playerName + '_'
 
-    // Only if we have a death position (meaning they died with essentials)
-    if (!playerData.deathPos) return
+    var deathX = data.getDouble(prefix + 'x')
+    var deathY = data.getDouble(prefix + 'y')
+    var deathZ = data.getDouble(prefix + 'z')
+    var hasDeathItems = data.getBoolean(prefix + 'hasItems')
 
-    // Give temporary copies of essential items
+    console.info('[Essential Items] Respawn event for ' + playerName)
+    console.info('[Essential Items] Death coords (NBT): ' + deathX + ', ' + deathY + ', ' + deathZ)
+    console.info('[Essential Items] Has death items: ' + hasDeathItems)
+    console.info('[Essential Items] Items count: ' + (playerData.items ? playerData.items.length : 0))
+
+    // Check if death position exists
+    if (!hasDeathItems) {
+        console.info('[Essential Items] No death items flag, skipping item give')
+        return
+    }
+
+    clearTemporaryItemIds(player.server, playerName)
+
     var given = 0
-    playerData.items.forEach(serializedItem => {
-        var tempItem = deserializeItem(serializedItem, true)
-        player.give(tempItem)
-        given++
-    })
+
+    if (playerData.items && playerData.items.length > 0) {
+        for (var i = 0; i < playerData.items.length; i++) {
+            try {
+                console.info('[Essential Items] Giving item ' + (i + 1) + ': ' + playerData.items[i].id)
+                var item = deserializeItemFromStorage(playerData.items[i])
+                player.give(item)
+                markItemAsTemporary(player.server, playerName, item.getId())
+                given++
+            } catch (e) {
+                console.warn('[Essential Items] Failed to give: ' + e)
+            }
+        }
+    }
 
     if (given > 0) {
         playerData.hasTemporaryItems = true
-        player.tell(Text.of('§6Você recebeu ' + given + ' item(ns) essencial(is) temporário(s).'))
-        player.tell(Text.of('§7Eles serão removidos quando você chegar ao seu corpo.'))
+        player.tell(Text.of('§6Recebeu ' + given + ' item(ns) essencial(is) temporário(s).'))
+        console.info('[Essential Items] Gave ' + given + ' items to ' + playerName)
+    } else {
+        console.info('[Essential Items] No items given to ' + playerName)
     }
 })
 
 // ============================================
-// CHAT COMMANDS
+// COMMANDS
 // ============================================
 
-ServerEvents.commandRegistry(event => {
+ServerEvents.commandRegistry(function (event) {
     var Commands = event.commands
     var StringArgumentType = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType')
     var IntegerArgumentType = Java.loadClass('com.mojang.brigadier.arguments.IntegerArgumentType')
+    var EntityArgument = Java.loadClass('net.minecraft.commands.arguments.EntityArgument')
 
     event.register(
         Commands.literal('essencial')
-            // /essencial add <nick> - Add held item as essential for player
             .then(Commands.literal('add')
-                .requires(src => src.hasPermission(2))
-                .then(Commands.argument('nick', StringArgumentType.word())
-                    .executes(ctx => {
+                .requires(function (src) { return src.hasPermission(2) })
+                .then(Commands.argument('target', EntityArgument.player())
+                    .executes(function (ctx) {
                         var source = ctx.getSource()
                         var executor = source.getPlayer()
-                        var targetNick = StringArgumentType.getString(ctx, 'nick')
+                        var targetPlayer = EntityArgument.getPlayer(ctx, 'target')
+                        var targetNick = targetPlayer.getName().getString()
 
-                        if (!executor) {
-                            source.sendFailure(Text.of('§cEste comando deve ser executado por um jogador.'))
-                            return 0
-                        }
+                        if (!executor) return 0
 
                         var heldItem = executor.getMainHandItem()
                         if (heldItem.isEmpty()) {
-                            source.sendFailure(Text.of('§cVocê precisa segurar um item na mão principal.'))
+                            executor.tell(Text.of('§cSegure um item.'))
                             return 0
                         }
 
+                        var serialized = serializeItemForStorage(heldItem)
                         var playerData = getPlayerEssentials(source.getServer(), targetNick)
-                        var serialized = serializeItem(heldItem)
                         playerData.items.push(serialized)
 
-                        source.sendSuccess(() => Text.of('§aItem essencial adicionado para §e' + targetNick + '§a: ')
-                            .append(heldItem.getDisplayName())
-                            .append(Text.of(' §7(slot ' + playerData.items.length + ')')), true)
+                        executor.tell(Text.of('§aItem adicionado para §e' + targetNick + '§a: §f' + heldItem.getId()))
 
                         return 1
                     })
                 )
             )
-            // /essencial remove <nick> <slot> - Remove essential item by slot
             .then(Commands.literal('remove')
-                .requires(src => src.hasPermission(2))
+                .requires(function (src) { return src.hasPermission(2) })
                 .then(Commands.argument('nick', StringArgumentType.word())
                     .then(Commands.argument('slot', IntegerArgumentType.integer(1))
-                        .executes(ctx => {
+                        .executes(function (ctx) {
                             var source = ctx.getSource()
+                            var executor = source.getPlayer()
                             var targetNick = StringArgumentType.getString(ctx, 'nick')
                             var slot = IntegerArgumentType.getInteger(ctx, 'slot')
 
                             var playerData = getPlayerEssentials(source.getServer(), targetNick)
 
                             if (slot < 1 || slot > playerData.items.length) {
-                                source.sendFailure(Text.of('§cSlot inválido. Use /essencial list ' + targetNick + ' para ver os slots.'))
+                                if (executor) executor.tell(Text.of('§cSlot inválido.'))
                                 return 0
                             }
 
-                            var removed = playerData.items.splice(slot - 1, 1)[0]
-                            source.sendSuccess(() => Text.of('§aItem essencial removido do slot ' + slot + ' de §e' + targetNick + '§a: ' + removed.id), true)
+                            var removedId = playerData.items[slot - 1].id
+
+                            var newItems = []
+                            for (var i = 0; i < playerData.items.length; i++) {
+                                if (i !== slot - 1) {
+                                    newItems.push(playerData.items[i])
+                                }
+                            }
+                            playerData.items = newItems
+
+                            if (executor) executor.tell(Text.of('§aRemovido: §f' + removedId))
 
                             return 1
                         })
                     )
                 )
             )
-            // /essencial list [nick] - List essential items
             .then(Commands.literal('list')
-                .requires(src => src.hasPermission(2))
-                .executes(ctx => {
+                .requires(function (src) { return src.hasPermission(2) })
+                .executes(function (ctx) {
                     var source = ctx.getSource()
                     var executor = source.getPlayer()
-                    if (!executor) {
-                        source.sendFailure(Text.of('§cEspecifique um nick: /essencial list <nick>'))
-                        return 0
-                    }
-                    var targetNick = executor.getName().getString()
-                    return listEssentials(source, targetNick)
+                    if (!executor) return 0
+                    return listEssentials(executor, source.getServer(), executor.getName().getString())
                 })
                 .then(Commands.argument('nick', StringArgumentType.word())
-                    .executes(ctx => {
+                    .executes(function (ctx) {
                         var source = ctx.getSource()
+                        var executor = source.getPlayer()
                         var targetNick = StringArgumentType.getString(ctx, 'nick')
-                        return listEssentials(source, targetNick)
+                        return listEssentials(executor, source.getServer(), targetNick)
                     })
                 )
             )
-            // /essencial clear <nick> - Clear all essential items
             .then(Commands.literal('clear')
-                .requires(src => src.hasPermission(2))
+                .requires(function (src) { return src.hasPermission(2) })
                 .then(Commands.argument('nick', StringArgumentType.word())
-                    .executes(ctx => {
+                    .executes(function (ctx) {
                         var source = ctx.getSource()
+                        var executor = source.getPlayer()
                         var targetNick = StringArgumentType.getString(ctx, 'nick')
 
                         var playerData = getPlayerEssentials(source.getServer(), targetNick)
-                        var count = playerData.items.length
+                        var count = playerData.items ? playerData.items.length : 0
+
                         playerData.items = []
                         playerData.hasTemporaryItems = false
+                        clearTemporaryItemIds(source.getServer(), targetNick)
 
-                        source.sendSuccess(() => Text.of('§aLimpou ' + count + ' item(ns) essencial(is) de §e' + targetNick), true)
+                        if (executor) executor.tell(Text.of('§aLimpou ' + count + ' item(ns) de §e' + targetNick))
 
                         return 1
                     })
                 )
             )
     )
+
+    console.info('[Essential Items] Commands registered')
 })
 
-function listEssentials(source, targetNick) {
-    var data = getEssentialData(source.getServer())
-    var playerData = data[targetNick]
+function listEssentials(player, server, targetNick) {
+    var playerData = getPlayerEssentials(server, targetNick)
 
-    if (!playerData || playerData.items.length === 0) {
-        source.sendSuccess(() => Text.of('§7' + targetNick + ' não tem itens essenciais configurados.'), false)
+    if (!player) return 1
+
+    if (!playerData.items || playerData.items.length === 0) {
+        player.tell(Text.of('§7Nenhum item essencial para ' + targetNick))
         return 1
     }
 
-    source.sendSuccess(() => Text.of('§6Itens essenciais de §e' + targetNick + '§6:'), false)
-    playerData.items.forEach((item, index) => {
-        var nbtInfo = item.nbt ? ' §8(com NBT)' : ''
-        source.sendSuccess(() => Text.of('  §7' + (index + 1) + '. §f' + item.id + nbtInfo), false)
-    })
+    player.tell(Text.of('§6Itens de §e' + targetNick + '§6:'))
+    for (var i = 0; i < playerData.items.length; i++) {
+        player.tell(Text.of('  §7' + (i + 1) + '. §f' + playerData.items[i].id))
+    }
 
     return 1
 }
+
+console.info('[Essential Items] System loaded')

@@ -25,23 +25,41 @@ EntityEvents.death(event => {
 
     var inventory = player.inventory
     var candidates = []
+    var playerName = player.getName().getString()
+
+    // Get essential item IDs directly from persistent data
+    var essentialIds = []
+    try {
+        var essentialData = player.server.persistentData.essentialItems
+        if (essentialData && essentialData[playerName] && essentialData[playerName].items) {
+            var items = essentialData[playerName].items
+            for (var j = 0; j < items.length; j++) {
+                essentialIds.push(items[j].id)
+            }
+        }
+    } catch (e) {
+        console.warn('[Death Penalty] Could not get essential items: ' + e)
+    }
 
     // Scan main inventory and armor
     var containerSize = inventory.getContainerSize()
     for (var i = 0; i < containerSize; i++) {
         var stack = inventory.getItem(i)
-        // Check if item exists and is not Sophisticated Backpacks
         if (!stack.isEmpty()) {
             var modId = stack.getMod()
+            var itemId = stack.getId()
+
             // Skip Sophisticated Backpacks/Storage
             if (modId === 'sophisticatedbackpacks' || modId === 'sophisticatedstorage') {
                 continue
             }
-            // Skip temporary essential items
-            var nbt = stack.getNbt()
-            if (nbt && nbt.getBoolean('essential_temporary') === true) {
+
+            // Skip essential items (protected from death penalty)
+            if (essentialIds.indexOf(itemId) !== -1) {
+                console.info('[Death Penalty] Skipping essential item: ' + itemId)
                 continue
             }
+
             candidates.push({ slot: i, item: stack })
         }
     }

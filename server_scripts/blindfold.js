@@ -1,6 +1,6 @@
 // Priority: 900
 // Blindfold System - Permanent blindness for roleplay characters
-// Allows sprinting while blind
+// Uses Blindness + Speed III to allow fast movement despite blind
 
 // ============================================
 // PERSISTENT DATA
@@ -19,27 +19,27 @@ function getBlindfoldData(server) {
 // ============================================
 
 function applyBlindfold(player) {
-    // Duration: 999999 ticks (~13.8 hours), will be reapplied on login
-    // Amplifier 0 = Blindness I
+    // Using Blindness for complete blackout + Speed III to compensate for no sprint
     player.potionEffects.add('minecraft:blindness', 999999, 0, false, false)
+    player.potionEffects.add('minecraft:speed', 999999, 2, false, false) // Speed III
 }
 
 function removeBlindfold(player) {
     player.removeEffect('minecraft:blindness')
+    player.removeEffect('minecraft:speed')
 }
 
 // ============================================
 // PLAYER LOGIN - Reapply blindfold if needed
 // ============================================
 
-PlayerEvents.loggedIn(event => {
+PlayerEvents.loggedIn(function (event) {
     var player = event.player
     var playerName = player.getName().getString()
     var data = getBlindfoldData(player.server)
 
     if (data[playerName]) {
-        // Delay slightly to ensure player is fully loaded
-        player.server.scheduleInTicks(5, () => {
+        player.server.scheduleInTicks(5, function () {
             applyBlindfold(player)
             player.tell(Text.of('§8[Personagem cego - Blindfold ativo]'))
         })
@@ -47,25 +47,23 @@ PlayerEvents.loggedIn(event => {
 })
 
 // ============================================
-// PERIODIC REAPPLY (every 5 minutes to ensure it stays)
+// PERIODIC REAPPLY (every 5 minutes)
 // ============================================
 
 var blindfoldTickCounter = 0
 
-ServerEvents.tick(event => {
+ServerEvents.tick(function (event) {
     blindfoldTickCounter++
-    // Every 5 minutes (6000 ticks)
     if (blindfoldTickCounter < 6000) return
     blindfoldTickCounter = 0
 
     var server = event.server
     var data = getBlindfoldData(server)
 
-    server.getPlayers().forEach(player => {
+    server.getPlayers().forEach(function (player) {
         var playerName = player.getName().getString()
         if (data[playerName]) {
-            // Reapply if effect is about to expire or missing
-            if (!player.hasEffect('minecraft:blindness')) {
+            if (!player.hasEffect('minecraft:darkness')) {
                 applyBlindfold(player)
             }
         }
@@ -76,47 +74,41 @@ ServerEvents.tick(event => {
 // COMMAND: /blindfold <nick> <true/false>
 // ============================================
 
-ServerEvents.commandRegistry(event => {
+ServerEvents.commandRegistry(function (event) {
     var Commands = event.commands
-    var StringArgumentType = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType')
+    var EntityArgument = Java.loadClass('net.minecraft.commands.arguments.EntityArgument')
     var BoolArgumentType = Java.loadClass('com.mojang.brigadier.arguments.BoolArgumentType')
 
     event.register(
         Commands.literal('blindfold')
-            .requires(src => src.hasPermission(2))
-            .then(Commands.argument('nick', StringArgumentType.word())
+            .requires(function (src) { return src.hasPermission(2) })
+            // /blindfold <player> <true/false>
+            .then(Commands.argument('target', EntityArgument.player())
                 .then(Commands.argument('enabled', BoolArgumentType.bool())
-                    .executes(ctx => {
+                    .executes(function (ctx) {
                         var source = ctx.getSource()
                         var server = source.getServer()
-                        var targetNick = StringArgumentType.getString(ctx, 'nick')
+                        var targetPlayer = EntityArgument.getPlayer(ctx, 'target')
                         var enabled = BoolArgumentType.getBool(ctx, 'enabled')
+                        var targetNick = targetPlayer.getName().getString()
+                        var executor = source.getPlayer()
 
                         var data = getBlindfoldData(server)
 
-                        // Find target player (if online)
-                        var targetPlayer = null
-                        server.getPlayers().forEach(p => {
-                            if (p.getName().getString() === targetNick) {
-                                targetPlayer = p
-                            }
-                        })
-
                         if (enabled) {
                             data[targetNick] = true
-                            if (targetPlayer) {
-                                applyBlindfold(targetPlayer)
-                                targetPlayer.tell(Text.of('§8[Personagem cego - Blindfold ativado]'))
+                            applyBlindfold(targetPlayer)
+                            targetPlayer.tell(Text.of('§8[Personagem cego - Blindfold ativado]'))
+                            if (executor) {
+                                executor.tell(Text.of('§aBlindfold §eATIVADO §apara §f' + targetNick))
                             }
-                            source.sendSuccess(() => Text.of('§aBlindfold §eATIVADO §apara §f' + targetNick +
-                                (targetPlayer ? '' : ' §7(offline - será aplicado no login)')), true)
                         } else {
                             delete data[targetNick]
-                            if (targetPlayer) {
-                                removeBlindfold(targetPlayer)
-                                targetPlayer.tell(Text.of('§a[Blindfold removido]'))
+                            removeBlindfold(targetPlayer)
+                            targetPlayer.tell(Text.of('§a[Blindfold removido]'))
+                            if (executor) {
+                                executor.tell(Text.of('§aBlindfold §cDESATIVADO §apara §f' + targetNick))
                             }
-                            source.sendSuccess(() => Text.of('§aBlindfold §cDESATIVADO §apara §f' + targetNick), true)
                         }
 
                         return 1
@@ -125,19 +117,24 @@ ServerEvents.commandRegistry(event => {
             )
             // /blindfold list - List all blindfolded players
             .then(Commands.literal('list')
-                .executes(ctx => {
+                .executes(function (ctx) {
                     var source = ctx.getSource()
+                    var executor = source.getPlayer()
                     var data = getBlindfoldData(source.getServer())
 
-                    var players = Object.keys(data)
-                    if (players.length === 0) {
-                        source.sendSuccess(() => Text.of('§7Nenhum jogador com blindfold ativo.'), false)
-                    } else {
-                        source.sendSuccess(() => Text.of('§6Jogadores com blindfold: §f' + players.join(', ')), false)
+                    var playersList = Object.keys(data)
+                    if (executor) {
+                        if (playersList.length === 0) {
+                            executor.tell(Text.of('§7Nenhum jogador com blindfold ativo.'))
+                        } else {
+                            executor.tell(Text.of('§6Jogadores com blindfold: §f' + playersList.join(', ')))
+                        }
                     }
 
                     return 1
                 })
             )
     )
+
+    console.info('[Blindfold] Command /blindfold registered')
 })
