@@ -196,7 +196,7 @@ EntityEvents.death(function (event) {
     }
 
     // Store coordinates directly in server persistentData using putDouble
-    var data = server.persistentData
+    var data = player.server.persistentData
     var prefix = 'essentialDeath_' + playerName + '_'
 
     data.putDouble(prefix + 'x', player.getX())
