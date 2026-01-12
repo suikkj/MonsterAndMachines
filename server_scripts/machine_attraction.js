@@ -3,7 +3,7 @@
 // Create machines and noisy blocks accelerate sculk spread nearby
 
 // ============ CONFIGURATION ============
-var MACHINE_CHECK_INTERVAL = 200     // Check every 10 seconds
+var MACHINE_CHECK_INTERVAL = 400     // Check every 20 seconds (optimized)
 var MACHINE_DETECTION_RADIUS = 32    // Radius to check for machines
 var SPREAD_ACCELERATION = 1.5        // 50% faster spread near machines
 
@@ -91,9 +91,10 @@ ServerEvents.tick(function (event) {
         var nuclearFound = false
 
         // Scan for noisy blocks
-        for (var x = -MACHINE_DETECTION_RADIUS; x <= MACHINE_DETECTION_RADIUS && machinesFound < 10; x += 4) {
-            for (var z = -MACHINE_DETECTION_RADIUS; z <= MACHINE_DETECTION_RADIUS && machinesFound < 10; z += 4) {
-                for (var y = -16; y <= 16 && machinesFound < 10; y += 4) {
+        // Optimized: step increased from 4 to 8 for better performance
+        for (var x = -MACHINE_DETECTION_RADIUS; x <= MACHINE_DETECTION_RADIUS && machinesFound < 10; x += 8) {
+            for (var z = -MACHINE_DETECTION_RADIUS; z <= MACHINE_DETECTION_RADIUS && machinesFound < 10; z += 8) {
+                for (var y = -16; y <= 16 && machinesFound < 10; y += 8) {
                     var checkPos = playerPos.offset(x, y, z)
                     var blockId = level.getBlock(checkPos).id
 

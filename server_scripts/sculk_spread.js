@@ -4,11 +4,12 @@
 
 // ============ CONFIGURATION ============
 var BASE_CONVERSION_TIME = 3600           // 3 minutes (3600 ticks = 180 seconds)
+var GLOOMY_SCULK_CONVERSION_TIME = 36000  // 30 minutes for gloomy_sculk specifically
 var SPREAD_CHECK_RADIUS = 48
 var MIN_Y = -64
 var MAX_Y = 320
-var SAFE_ZONE_Y = 24  // Sculk cannot spread below this Y level (underground is safe!)
-var SPREAD_CHECK_INTERVAL = 10  // Every 0.5 seconds - check often for chain reaction
+var SAFE_ZONE_Y = 0  // Sculk cannot spread below this Y level (underground is safe!)
+var SPREAD_CHECK_INTERVAL = 20  // Every 1 second - optimized for performance
 
 // ============ BLOCK LISTS ============
 
@@ -166,9 +167,15 @@ function queueAdjacentBlocks(level, x, y, z, currentTick, dimKey) {
 
         // Only add if not already tracking
         if (!spreadingBlocks[posKey]) {
+            // Gloomy sculk takes 30 minutes to convert, other blocks 3 minutes
+            var blockConversionTime = conversionTime
+            if (blockId === 'deeperdarker:gloomy_sculk') {
+                blockConversionTime = GLOOMY_SCULK_CONVERSION_TIME
+            }
+
             spreadingBlocks[posKey] = {
                 startTick: currentTick,
-                conversionTime: conversionTime,
+                conversionTime: blockConversionTime,
                 x: nx,
                 y: ny,
                 z: nz,
@@ -243,8 +250,8 @@ ServerEvents.tick(function (event) {
         var dimKey = level.dimension.toString()
         var playerPos = player.blockPosition()
 
-        // Sample 50 random positions around the player
-        for (var s = 0; s < 50; s++) {
+        // Sample 15 random positions around the player (optimized from 50)
+        for (var s = 0; s < 15; s++) {
             var rx = Math.floor((Math.random() * SPREAD_CHECK_RADIUS * 2) - SPREAD_CHECK_RADIUS)
             var rz = Math.floor((Math.random() * SPREAD_CHECK_RADIUS * 2) - SPREAD_CHECK_RADIUS)
             var ry = Math.floor((Math.random() * 40) - 20)

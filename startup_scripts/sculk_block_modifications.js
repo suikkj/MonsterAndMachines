@@ -34,13 +34,27 @@ BlockEvents.modification(event => {
 
 // Modify golden boots to have 5000 durability
 ItemEvents.modification(event => {
+    console.info('[GoldenBoots] Starting durability modification...')
+
     event.modify('minecraft:golden_boots', item => {
-        // Try both approaches for compatibility
-        try {
-            item.maxDamage = 5000
-        } catch (e) { }
-        try {
-            item.setMaxDamage(5000)
-        } catch (e) { }
+        console.info('[GoldenBoots] Found item, current maxDamage: ' + item.maxDamage)
+
+        // In KubeJS 1.21, maxDamage should be directly settable
+        item.maxDamage = 5000
+
+        console.info('[GoldenBoots] After setting, maxDamage is now: ' + item.maxDamage)
+
+        // Log all available properties for debugging
+        console.info('[GoldenBoots] Item properties: ' + Object.keys(item).join(', '))
     })
+
+    console.info('[GoldenBoots] Modification complete!')
+})
+
+// Alternative approach using ItemEvents.toolTierRegistry if modification doesn't work
+// This creates a log to verify the script is loading
+StartupEvents.postInit(() => {
+    console.info('[GoldenBoots] Startup script loaded successfully')
+    console.info('[GoldenBoots] If you see "current maxDamage: 91" and "maxDamage is now: 91", the modification is not sticking')
+    console.info('[GoldenBoots] This might require a data-driven approach with a datapack instead')
 })

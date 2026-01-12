@@ -146,7 +146,12 @@ const BLOCKED_MODS = [
     'interiors',
     'copycats',
     'createbetterfps',
-    'createcontraptionterminals'
+    'createcontraptionterminals',
+
+    // Food mods - blocked from loot
+    'croptopia',
+    'farmersdelight',
+    'farmers_delight'
 ]
 
 // Allowed ores (raw and ore blocks)

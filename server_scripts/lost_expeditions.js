@@ -32,11 +32,23 @@ var EXPEDITION_LORE = {
             'Você não vai conseguir enganar Ele. Muito menos arrancar algo Dele. Independente do que Ele disser, não escute Ele.'
         ]
     },
-    group3: {
+    group4: {
         title: 'Galera Expedicionária 3',
         author: 'Carlito',
         pages: [
             'Ja que o pessoal do Refugio vai ler essas anotacoes, queria enfatizar A MISERIA DE SUPRIMENTO. VTNC T.U.R. EMPRESA DE MERDA.'
+        ]
+    },
+    group3: {
+        title: 'Piedade',
+        author: 'Desconhecido',
+        pages: [
+            'É tudo que eu peço a quem estiver lendo isso. Piedade. Minha alma… ela foi corrompida pelo vazio capaz de preencher até o maior vão. O vazio está em mim. E se você está aqui, o vazio está em você.',
+            'Ele te consumirá, lentamente, pouco a pouco. Suas palavras não serão apenas suas. Suas vontades não serão as suas vontades. Você não será mais você.',
+            'A resposta para o vazio está lá. Além desses portões. Além do limite que nos foi posto. Além do mundo que nos foi criado. Porém a salvação do vazio irá fazer você se perder de si mesmo.',
+            'Há um mito no mundo. Um mito que se prova não mais apenas um mito depois do que eu vi, li, ouvi, senti. A Perdição. Ela…ela é a chave. A chave para se manter é se perder de si mesmo. Uma mente incapaz de pensar. Uma alma incapaz de sentir.',
+            'O que você escolhe? Não ser você, ou se perder de si mesmo.',
+            'Se deseja a salvação, perante os riscos da perdição, abra os portões.'
         ]
     }
 }
