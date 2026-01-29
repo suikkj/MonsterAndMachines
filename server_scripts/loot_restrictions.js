@@ -128,6 +128,11 @@ const BLOCKED_MODS = [
     'ars_technica',
     'arsdelight',
 
+    // Iron's Spellbooks and addons (except allowed inks)
+    'irons_spellbooks',
+    'hazennstuff',
+    'gtbcs_geomancy_plus',
+
     // Create mod and all addons
     'create',
     'create_connected',
@@ -151,7 +156,32 @@ const BLOCKED_MODS = [
     // Food mods - blocked from loot
     'croptopia',
     'farmersdelight',
-    'farmers_delight'
+    'farmers_delight',
+    'farmers_croptopia',
+
+    // Let's Do food/drink mods
+    'bakery',
+    'beachparty',
+    'brewery',
+    'candlelight',
+    'farm_and_charm',
+    'herbalbrews',
+    'meadow',
+    'vinery',
+    'wildernature',
+    'letsdocompat',
+
+    // Delight addon mods
+    'dungeonsdelight',
+    'endersdelight',
+    'oceansdelight',
+    'twilightdelight',
+    'lendersdelight',
+    'vanilladelight',
+    'moredelight',
+
+    // Other food mods
+    'jmc'  // Just More Cakes
 ]
 
 // Allowed ores (raw and ore blocks)
@@ -258,6 +288,13 @@ const IRONS_SPELLS_BLOCKED = [
 // Iron's Spells rarity keywords - block epic and legendary
 const IRONS_BLOCKED_RARITIES = ['epic', 'legendary']
 
+// ALLOWED items from otherwise blocked mods (exceptions)
+const ALLOWED_EXCEPTIONS = [
+    'irons_spellbooks:common_ink',
+    'irons_spellbooks:uncommon_ink',
+    'irons_spellbooks:rare_ink'
+]
+
 // Function to check if item is a weapon
 function isWeapon(itemId) {
     if (!itemId) return false
@@ -339,7 +376,10 @@ function shouldRemoveItem(item) {
     }
     if (!id) return false
 
-    // 0. Direct namespace check (most reliable for catching mod items)
+    // 0. Check allowed exceptions FIRST (before blocking)
+    if (ALLOWED_EXCEPTIONS.includes(id)) return false
+
+    // 1. Direct namespace check (most reliable for catching mod items)
     for (let blockedMod of BLOCKED_MODS) {
         if (id.startsWith(blockedMod + ':')) return true
     }

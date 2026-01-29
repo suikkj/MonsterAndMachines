@@ -14,7 +14,8 @@ var DARKVISION_ALLOWED_PLAYERS = [
     'adrielg1',
     'Ma4tsu',
     'suikkj',
-    'cactian0'
+    'cactian0',
+    'MonoChroma9696'
 ]
 
 // Duração do efeito em ticks (20 ticks = 1 segundo)
@@ -42,13 +43,13 @@ function enableDarkvision(player) {
     var MobEffects = Java.loadClass('net.minecraft.world.effect.MobEffects')
     var MobEffectInstance = Java.loadClass('net.minecraft.world.effect.MobEffectInstance')
 
-    // Night Vision com duração longa, sem partículas, ambient
+    // Night Vision com duração longa, sem partículas
     var effect = new MobEffectInstance(
         MobEffects.NIGHT_VISION,
         DARKVISION_DURATION,
         0,      // amplifier (0 = nível 1)
-        true,   // ambient (efeito mais sutil)
-        false,  // showParticles
+        false,  // ambient
+        false,  // showParticles (sem partículas)
         true    // showIcon
     )
 

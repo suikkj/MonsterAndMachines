@@ -73,9 +73,15 @@ BlockEvents.placed(function (event) {
     var level = event.level
     var pos = block.pos
 
+    // Check if placed on top of sculk
+    var blockBelow = level.getBlock(pos.x, pos.y - 1, pos.z)
+    var isOnSculk = blockBelow && blockBelow.id === 'minecraft:sculk'
+
     // Cleanse the diamond-shaped area
     cleanseSculkAreaDiamond(level, pos.x, pos.y, pos.z, CLEANSE_RADIUS)
 
-    // CONSUME the gold block - replace with gloomy_sculk
-    block.set('deeperdarker:gloomy_sculk')
+    // CONSUME the gold block ONLY if placed on sculk - replace with gloomy_sculk
+    if (isOnSculk) {
+        block.set('deeperdarker:gloomy_sculk')
+    }
 })

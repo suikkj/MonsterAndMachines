@@ -198,6 +198,9 @@ const QUEST_STAGE_MAP = {
     // 7711C7D44E788C62 = Create New Age básico
     '7711C7D44E788C62': 'stage_engenheiro_newage',
 
+    // Pumpjack items (deps: speedometer/stressometer + newage)
+    'PUMPJACK_STAGE': 'stage_engenheiro_pumpjack',
+
     // 24424B49574D260A = Solar heating + stirling
     '24424B49574D260A': 'stage_engenheiro_solar',
 

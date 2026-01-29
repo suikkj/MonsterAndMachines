@@ -3,7 +3,8 @@
 // Create machines and noisy blocks accelerate sculk spread nearby
 
 // ============ CONFIGURATION ============
-var MACHINE_CHECK_INTERVAL = 400     // Check every 20 seconds (optimized)
+var MACHINE_CHECK_INTERVAL = 400     // Check every 20 seconds
+var MACHINE_VERTICAL_RANGE = 8       // Vertical range to check for machines (was 16)
 var MACHINE_DETECTION_RADIUS = 32    // Radius to check for machines
 var SPREAD_ACCELERATION = 1.5        // 50% faster spread near machines
 
@@ -75,13 +76,15 @@ function isNuclearBlock(blockId) {
 
 // ============ TICK EVENT - DETECT MACHINES ============
 ServerEvents.tick(function (event) {
-    if (event.server.tickCount % MACHINE_CHECK_INTERVAL !== 0) return
-
     var currentTick = event.server.tickCount
 
     // For each online player, check for nearby machines
     event.server.playerList.players.forEach(function (player) {
         if (player.isCreative() || player.isSpectator()) return
+
+        // Distribute load using player ID offset
+        var playerId = Math.abs(player.uuid.hashCode()) % MACHINE_CHECK_INTERVAL
+        if ((currentTick + playerId) % MACHINE_CHECK_INTERVAL !== 0) return
 
         var level = player.level
         var dimKey = level.dimension.toString()
@@ -94,7 +97,7 @@ ServerEvents.tick(function (event) {
         // Optimized: step increased from 4 to 8 for better performance
         for (var x = -MACHINE_DETECTION_RADIUS; x <= MACHINE_DETECTION_RADIUS && machinesFound < 10; x += 8) {
             for (var z = -MACHINE_DETECTION_RADIUS; z <= MACHINE_DETECTION_RADIUS && machinesFound < 10; z += 8) {
-                for (var y = -16; y <= 16 && machinesFound < 10; y += 8) {
+                for (var y = -MACHINE_VERTICAL_RANGE; y <= MACHINE_VERTICAL_RANGE && machinesFound < 10; y += 8) {
                     var checkPos = playerPos.offset(x, y, z)
                     var blockId = level.getBlock(checkPos).id
 

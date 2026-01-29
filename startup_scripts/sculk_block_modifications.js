@@ -8,8 +8,14 @@ const UNBREAKABLE_SCULK = [
     'minecraft:sculk',
     'minecraft:sculk_catalyst',
     'minecraft:sculk_shrieker',
-    'minecraft:sculk_sensor',
-    'deeperdarker:gloomy_sculk'
+    'minecraft:sculk_sensor'
+]
+
+// Blocks that can be broken with golden_hoe (checked in server script)
+const GLOOMY_SCULK_BLOCKS = [
+    'deeperdarker:gloomy_sculk',
+    'deeperdarker:gloomy_cactus',
+    'deeperdarker:gloomy_grass'
 ]
 
 // Sculk veins are breakable but VERY hard (golden_hoe check is in server script)
@@ -20,6 +26,15 @@ BlockEvents.modification(event => {
     UNBREAKABLE_SCULK.forEach(blockId => {
         event.modify(blockId, block => {
             block.destroySpeed = 1000
+            block.explosionResistance = 3600000
+        })
+    })
+
+    // Gloomy sculk blocks are hard but breakable with golden_hoe
+    // Server script enforces the golden_hoe requirement
+    GLOOMY_SCULK_BLOCKS.forEach(blockId => {
+        event.modify(blockId, block => {
+            block.destroySpeed = 5  // Breakable with golden_hoe in reasonable time
             block.explosionResistance = 3600000
         })
     })

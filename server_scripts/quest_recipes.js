@@ -225,6 +225,352 @@ var QUEST_DATA = {
         ]
     },
 
+    // Pumpjack items (deps: speedometer/stressometer + newage)
+    // Requer completar 4ED883B217560E28 E 7711C7D44E788C62
+    'VIRTUAL_PUMPJACK': {
+        deps: ['4ED883B217560E28', '7711C7D44E788C62'],
+        items: [
+            'createdieselgenerators:pumpjack_hole',
+            'createdieselgenerators:andesite_scaffolding',
+            'createdieselgenerators:pumpjack_bearing',
+            'createdieselgenerators:pumpjack_head',
+            'createdieselgenerators:pumpjack_crank'
+        ]
+    },
+
+    // Basin Lid (deps: quest 4DD02F4C0C3E1CAA)
+    'VIRTUAL_BASIN_LID': {
+        deps: ['4DD02F4C0C3E1CAA'],
+        items: ['createdieselgenerators:basin_lid']
+    },
+
+    // Distillation Controller (deps: quest 2D2BB9965C366B6E)
+    'VIRTUAL_DISTILLATION_CONTROLLER': {
+        deps: ['2D2BB9965C366B6E'],
+        items: ['createdieselgenerators:distillation_controller']
+    },
+
+    // Diesel Engine items (deps: quests 163E66E37B681240 E 6643E5FE09352F70)
+    'VIRTUAL_DIESEL_ENGINE': {
+        deps: ['163E66E37B681240', '6643E5FE09352F70'],
+        items: [
+            'createdieselgenerators:diesel_engine',
+            'createdieselgenerators:engine_silencer',
+            'createdieselgenerators:engine_turbocharger'
+        ]
+    },
+
+    // Huge Diesel Engine (deps: quest 1D9BD27B2A4B2627)
+    'VIRTUAL_HUGE_DIESEL_ENGINE': {
+        deps: ['1D9BD27B2A4B2627'],
+        items: ['createdieselgenerators:huge_diesel_engine']
+    },
+
+    // ============================================
+    // CREATE NEW AGE - Progression Chain
+    // ============================================
+
+    // 5AC0107597A59018 - Redstone Magnet quest (deps: newage básico 7711C7D44E788C62)
+    'VIRTUAL_REDSTONE_MAGNET': {
+        deps: ['7711C7D44E788C62'],
+        items: [
+            'create_new_age:redstone_magnet',
+            'create_new_age:overcharged_iron_wire'
+        ]
+    },
+
+    // 3C5922FA254C1E15 - Layered Magnet quest (deps: redstone magnet 5AC0107597A59018)
+    'VIRTUAL_LAYERED_MAGNET': {
+        deps: ['5AC0107597A59018'],
+        items: [
+            'create_new_age:layered_magnet',
+            'create_new_age:overcharged_golden_wire',
+            'create_new_age:advanced_motor'
+        ]
+    },
+
+    // 5138D010D4E37714 - Fluxuated Magnetite quest (deps: layered magnet 3C5922FA254C1E15)
+    'VIRTUAL_FLUXUATED_MAGNETITE': {
+        deps: ['3C5922FA254C1E15'],
+        items: [
+            'create_new_age:fluxuated_magnetite',
+            'create_new_age:overcharged_diamond_wire',
+            'create_new_age:reinforced_motor',
+            'create_new_age:advanced_motor_extension'
+        ]
+    },
+
+    // Pipez mod items (deps: layered magnet quest 3C5922FA254C1E15)
+    'VIRTUAL_PIPEZ': {
+        deps: ['3C5922FA254C1E15'],
+        items: [
+            'pipez:item_pipe',
+            'pipez:fluid_pipe',
+            'pipez:energy_pipe',
+            'pipez:gas_pipe',
+            'pipez:universal_pipe',
+            'pipez:basic_upgrade',
+            'pipez:improved_upgrade',
+            'pipez:advanced_upgrade',
+            'pipez:ultimate_upgrade',
+            'pipez:infinity_upgrade',
+            'pipez:basic_filter',
+            'pipez:advanced_filter',
+            'pipez:basic_fluid_filter',
+            'pipez:advanced_fluid_filter',
+            'pipez:basic_gas_filter',
+            'pipez:advanced_gas_filter',
+            'pipez:wrench'
+        ]
+    },
+
+    // SecurityCraft mod items (deps: quest 36C10AA4DDFD07D9 - Coke Bricks)
+    'VIRTUAL_SECURITYCRAFT': {
+        deps: ['36C10AA4DDFD07D9'],
+        items: [
+            // Reinforced blocks
+            'securitycraft:reinforced_stone',
+            'securitycraft:reinforced_cobblestone',
+            'securitycraft:reinforced_iron_block',
+            'securitycraft:reinforced_diamond_block',
+            'securitycraft:reinforced_glass',
+            'securitycraft:reinforced_oak_planks',
+            'securitycraft:reinforced_spruce_planks',
+            'securitycraft:reinforced_birch_planks',
+            'securitycraft:reinforced_jungle_planks',
+            'securitycraft:reinforced_acacia_planks',
+            'securitycraft:reinforced_dark_oak_planks',
+            'securitycraft:reinforced_obsidian',
+            // Security items
+            'securitycraft:keypad',
+            'securitycraft:keypad_door',
+            'securitycraft:keypad_chest',
+            'securitycraft:keypad_furnace',
+            'securitycraft:keypad_barrel',
+            'securitycraft:frame',
+            'securitycraft:keycard_reader',
+            'securitycraft:retinal_scanner',
+            'securitycraft:laser_block',
+            'securitycraft:inventory_scanner',
+            'securitycraft:alarm',
+            'securitycraft:cage_trap',
+            'securitycraft:claymore',
+            'securitycraft:ims',
+            'securitycraft:bouncing_betty',
+            'securitycraft:mine',
+            'securitycraft:portable_radar',
+            'securitycraft:motion_activated_light',
+            'securitycraft:security_camera',
+            'securitycraft:username_logger',
+            'securitycraft:panic_button',
+            'securitycraft:protecto',
+            'securitycraft:sentry',
+            // Tools and items
+            'securitycraft:universal_block_modifier',
+            'securitycraft:universal_block_remover',
+            'securitycraft:universal_owner_changer',
+            'securitycraft:universal_key_changer',
+            'securitycraft:admin_tool',
+            'securitycraft:camera_monitor',
+            'securitycraft:keycard_holder',
+            'securitycraft:briefcase',
+            'securitycraft:taser',
+            'securitycraft:sentry_remote_access_tool',
+            'securitycraft:mine_remote_access_tool',
+            'securitycraft:wire_cutters',
+            'securitycraft:codebreaker',
+            // Keycards
+            'securitycraft:keycard_lv1',
+            'securitycraft:keycard_lv2',
+            'securitycraft:keycard_lv3',
+            'securitycraft:keycard_lv4',
+            'securitycraft:keycard_lv5',
+            'securitycraft:limited_use_keycard'
+        ]
+    },
+
+    // Create Nuclear Anti-Radiation Armor (deps: quests 2FF0FB35DDCE7F97, 15406F3937F9DA86, 3E049B420B320FF7)
+    // All color variants of anti-radiation armor
+    'VIRTUAL_ANTI_RADIATION_ARMOR': {
+        deps: ['2FF0FB35DDCE7F97', '15406F3937F9DA86', '3E049B420B320FF7'],
+        items: [
+            // Boots (only one variant)
+            'createnuclear:anti_radiation_boots',
+            // White
+            'createnuclear:white_anti_radiation_helmet',
+            'createnuclear:white_anti_radiation_chestplate',
+            'createnuclear:white_anti_radiation_leggings',
+            // Orange
+            'createnuclear:orange_anti_radiation_helmet',
+            'createnuclear:orange_anti_radiation_chestplate',
+            'createnuclear:orange_anti_radiation_leggings',
+            // Magenta
+            'createnuclear:magenta_anti_radiation_helmet',
+            'createnuclear:magenta_anti_radiation_chestplate',
+            'createnuclear:magenta_anti_radiation_leggings',
+            // Light Blue
+            'createnuclear:light_blue_anti_radiation_helmet',
+            'createnuclear:light_blue_anti_radiation_chestplate',
+            'createnuclear:light_blue_anti_radiation_leggings',
+            // Yellow
+            'createnuclear:yellow_anti_radiation_helmet',
+            'createnuclear:yellow_anti_radiation_chestplate',
+            'createnuclear:yellow_anti_radiation_leggings',
+            // Green (Lime)
+            'createnuclear:green_anti_radiation_helmet',
+            'createnuclear:green_anti_radiation_chestplate',
+            'createnuclear:green_anti_radiation_leggings',
+            // Pink
+            'createnuclear:pink_anti_radiation_helmet',
+            'createnuclear:pink_anti_radiation_chestplate',
+            'createnuclear:pink_anti_radiation_leggings',
+            // Dark Gray
+            'createnuclear:dark_gray_anti_radiation_helmet',
+            'createnuclear:dark_gray_anti_radiation_chestplate',
+            'createnuclear:dark_gray_anti_radiation_leggings',
+            // Light Gray
+            'createnuclear:light_gray_anti_radiation_helmet',
+            'createnuclear:light_gray_anti_radiation_chestplate',
+            'createnuclear:light_gray_anti_radiation_leggings',
+            // Cyan
+            'createnuclear:cyan_anti_radiation_helmet',
+            'createnuclear:cyan_anti_radiation_chestplate',
+            'createnuclear:cyan_anti_radiation_leggings',
+            // Purple
+            'createnuclear:purple_anti_radiation_helmet',
+            'createnuclear:purple_anti_radiation_chestplate',
+            'createnuclear:purple_anti_radiation_leggings',
+            // Blue
+            'createnuclear:blue_anti_radiation_helmet',
+            'createnuclear:blue_anti_radiation_chestplate',
+            'createnuclear:blue_anti_radiation_leggings',
+            // Brown
+            'createnuclear:brown_anti_radiation_helmet',
+            'createnuclear:brown_anti_radiation_chestplate',
+            'createnuclear:brown_anti_radiation_leggings',
+            // Red
+            'createnuclear:red_anti_radiation_helmet',
+            'createnuclear:red_anti_radiation_chestplate',
+            'createnuclear:red_anti_radiation_leggings',
+            // Black
+            'createnuclear:black_anti_radiation_helmet',
+            'createnuclear:black_anti_radiation_chestplate',
+            'createnuclear:black_anti_radiation_leggings'
+        ]
+    },
+
+    // ============================================
+    // CYBERSPACE - Progression Chain
+    // ============================================
+
+    // 7F7962941AE1C511 - Machine Casing Block (deps: mechanical crafters 7BEDBFD13BF166F6)
+    'VIRTUAL_MACHINE_CASING': {
+        deps: ['7BEDBFD13BF166F6'],
+        items: ['cyberspace:machine_casing_block']
+    },
+
+    // Terminal Block (deps: machine casing quest 7F7962941AE1C511)
+    'VIRTUAL_TERMINAL_BLOCK': {
+        deps: ['7F7962941AE1C511'],
+        items: ['cyberspace:terminal_block']
+    },
+
+    // ============================================
+    // AIRCRAFT - Progression Chain
+    // ============================================
+
+    // 082B87D9A513747E - Biplane (deps: cardboard armor 49B5B326035ED365)
+    'VIRTUAL_BIPLANE': {
+        deps: ['49B5B326035ED365'],
+        items: ['immersive_aircraft:biplane']
+    },
+
+    // Man of Many Planes mod items (deps: biplane quest 082B87D9A513747E)
+    'VIRTUAL_MAN_OF_MANY_PLANES': {
+        deps: ['082B87D9A513747E'],
+        items: [
+            'man_of_many_planes:scarlet_biplane',
+            'man_of_many_planes:steel_biplane',
+            'man_of_many_planes:gilded_biplane',
+            'man_of_many_planes:ar2',
+            'man_of_many_planes:cargo_plane',
+            'man_of_many_planes:seaplane',
+            'man_of_many_planes:bomber',
+            'man_of_many_planes:fighter',
+            'man_of_many_planes:helicopter',
+            'man_of_many_planes:jet',
+            'man_of_many_planes:tiltrotor'
+        ]
+    },
+
+    // ============================================
+    // ENCHANTING / SPELLBOOKS - Progression Chain
+    // ============================================
+
+    // 76EBCF4270FC764C - Enchanting Table (deps: enchanted books quest 64F764A8FD782673)
+    'VIRTUAL_ENCHANTING_TABLE': {
+        deps: ['64F764A8FD782673'],
+        items: ['minecraft:enchanting_table']
+    },
+
+    // 1E85356ED0C79D9C - Enchanting Infuser (deps: enchanting table quest 76EBCF4270FC764C)
+    'VIRTUAL_ENCHANTING_INFUSER': {
+        deps: ['76EBCF4270FC764C'],
+        items: ['enchantinginfuser:enchanting_infuser']
+    },
+
+    // 3587E56F50EF562D - Disenchanting Table (deps: enchanting table quest 76EBCF4270FC764C)
+    'VIRTUAL_DISENCHANTING_TABLE': {
+        deps: ['76EBCF4270FC764C'],
+        items: ['disenchanting_table:disenchanting_table']
+    },
+
+    // 4FCE2D2F48A6C0D0 - Gold Spell Book (deps: infernal dragon kill 4633843F83C846AD)
+    'VIRTUAL_GOLD_SPELL_BOOK': {
+        deps: ['4633843F83C846AD'],
+        items: ['irons_spellbooks:gold_spell_book']
+    },
+
+    // 1527F5A9BA002083 - Diamond Spell Book (deps: 404093B4C76B5D07 + gold spell book 4FCE2D2F48A6C0D0)
+    'VIRTUAL_DIAMOND_SPELL_BOOK': {
+        deps: ['404093B4C76B5D07', '4FCE2D2F48A6C0D0'],
+        items: ['irons_spellbooks:diamond_spell_book']
+    },
+
+    // Too Many Bows - Ironclad Bow (deps: tower key tidal bow 6F66E95793BA0B29)
+    'VIRTUAL_IRONCLAD_BOW': {
+        deps: ['6F66E95793BA0B29'],
+        items: ['too_many_bows:ironclad_bow']
+    },
+
+    // ============================================
+    // IRON'S SPELLBOOKS - Crafting Stations Chain
+    // ============================================
+
+    // 7496A76268E1C945 - Inscription Table (deps: tower key obsidian claymore 3E62D4148A332755)
+    'VIRTUAL_INSCRIPTION_TABLE': {
+        deps: ['3E62D4148A332755'],
+        items: ['irons_spellbooks:inscription_table']
+    },
+
+    // 5481D05951A5F6A7 - Arcane Anvil (deps: inscription table 7496A76268E1C945)
+    'VIRTUAL_ARCANE_ANVIL': {
+        deps: ['7496A76268E1C945'],
+        items: ['irons_spellbooks:arcane_anvil']
+    },
+
+    // 6AB3AEA78B0C5B57 - Alchemist Cauldron (deps: inscription table 7496A76268E1C945)
+    'VIRTUAL_ALCHEMIST_CAULDRON': {
+        deps: ['7496A76268E1C945'],
+        items: ['irons_spellbooks:alchemist_cauldron']
+    },
+
+    // 13172B7992BC01EC - Scroll Forge (deps: inscription table 7496A76268E1C945)
+    'VIRTUAL_SCROLL_FORGE': {
+        deps: ['7496A76268E1C945'],
+        items: ['irons_spellbooks:scroll_forge']
+    },
+
     // 5103C1B8A841F760 - Mech Eye (deps: solar)
     '5103C1B8A841F760': {
         deps: ['24424B49574D260A'],
@@ -943,13 +1289,16 @@ for (var i = 0; i < questIds.length; i++) {
     var items = data.items
     var deps = data.deps.slice()  // Copia o array de deps
 
-    // CORREÇÃO: Se não é uma entrada VIRTUAL, inclui o próprio questId nos deps
-    // Isso garante que a quest precisa estar completa para os itens serem craftáveis
+    // CORREÇÃO: Removendo a inclusão da própria quest
+    // Quests de craft/obtenção criam um ciclo vicioso se forem dependências para o item que pedem
+    // Apenas as dependências anteriores (prerequisites) devem bloquear o craft
+    /*
     if (!questId.startsWith('VIRTUAL')) {
         if (deps.indexOf(questId) === -1) {
             deps.push(questId)
         }
     }
+    */
 
     for (var j = 0; j < items.length; j++) {
         var itemId = items[j]
@@ -992,6 +1341,14 @@ function isQuestCompleted(player, questIdHex) {
         var playerName = player.getName().getString()
         var cacheKey = playerName + '_' + questIdHex
 
+        // 1. Verificar override manual (persistentData)
+        if (player.persistentData && player.persistentData.forced_quests) {
+            var forced = player.persistentData.forced_quests
+            for (var i = 0; i < forced.length; i++) {
+                if (forced[i] == questIdHex) return true
+            }
+        }
+
         // Verificar cache
         if (questCompletionCache[cacheKey] !== undefined) {
             return questCompletionCache[cacheKey]
@@ -1015,265 +1372,342 @@ function isQuestCompleted(player, questIdHex) {
             return false
         }
 
-        // Obter team data do jogador - tentar vários métodos
+        // Obter team data do jogador
         var playerUUID = player.uuid
         var teamData = null
-        var mcPlayer = player.minecraftPlayer ? player.minecraftPlayer : player
 
-        // Primeiro tentar via FTB Teams para obter o time correto
+        // Tentar obter via UUID direto (funciona para offline mode também)
         try {
-            var FTBTeamsAPI = Java.loadClass('dev.ftb.mods.ftbteams.api.FTBTeamsAPI')
-            var teamsApi = FTBTeamsAPI.api()
-            var teamManager = teamsApi.getManager()
-            var playerTeam = teamManager.getTeamForPlayer(playerUUID)
-            if (playerTeam.isPresent()) {
-                var team = playerTeam.get()
-                var teamId = team.getId()
-                console.info('[Quest DEBUG] FTB Teams found team: ' + team.getName() + ' ID: ' + teamId)
-                // Usar o ID do time para obter o TeamData
-                teamData = questFile.getNullableTeamData(teamId)
-                if (teamData) {
-                    console.info('[Quest DEBUG] Got TeamData via FTB Teams!')
-                }
-            }
-        } catch (eTeams) {
-            console.info('[Quest DEBUG] FTB Teams lookup failed: ' + eTeams)
-        }
+            teamData = questFile.getNullableTeamData(playerUUID)
+        } catch (e1) { }
 
-        // Fallback: Método original com playerUUID
+        // Fallback para getTeamData se null
         if (!teamData) {
             try {
-                teamData = questFile.getNullableTeamData(playerUUID)
-                if (teamData) {
-                    console.info('[Quest DEBUG] getNullableTeamData(playerUUID) worked!')
-                }
-            } catch (e1) { }
+                teamData = questFile.getTeamData(playerUUID)
+            } catch (e2) { }
+        }
 
-            // Método 2: getTeamData
-            if (!teamData) {
-                try {
-                    teamData = questFile.getTeamData(playerUUID)
-                    if (teamData) {
-                        console.info('[Quest DEBUG] getTeamData worked!')
-                    }
-                } catch (e2) { }
-            }
-
-            // Método 3: Iterar todos os dados
-            if (!teamData) {
-                try {
-                    var allData = questFile.getAllData()
-                    if (allData) {
-                        var iterator = allData.iterator()
-                        while (iterator.hasNext()) {
-                            var data = iterator.next()
-                            // Verificar se este data pertence ao jogador
-                            if (data && data.getPlayerId && data.getPlayerId().equals(playerUUID)) {
-                                teamData = data
-                                console.info('[Quest DEBUG] Found via getAllData!')
-                                break
-                            }
+        if (!teamData) {
+            // Última tentativa: iterar todos os dados
+            try {
+                var allData = questFile.getAllData()
+                if (allData) {
+                    var iterator = allData.iterator()
+                    while (iterator.hasNext()) {
+                        var data = iterator.next()
+                        if (data && data.getPlayerId && data.getPlayerId().equals(playerUUID)) {
+                            teamData = data
+                            break
                         }
                     }
-                } catch (e3) {
-                    console.warn('[Quest DEBUG] getAllData failed: ' + e3)
                 }
-            }
+            } catch (e3) { }
+        }
 
-            if (!teamData) {
-                console.warn('[Quest DEBUG] No teamData found for: ' + player.getName().getString())
-                return false
-            }
-
-            // Debug: mostrar qual team foi encontrado
-            try {
-                var teamId = teamData.getTeamId ? teamData.getTeamId() : 'unknown'
-                var teamName = teamData.getName ? teamData.getName() : 'unknown'
-                console.info('[Quest DEBUG] TeamData found - ID: ' + teamId + ' | Name: ' + teamName + ' | Player UUID: ' + playerUUID)
-
-                // Tentar obter contagem de quests completas
-                if (teamData.getCompletedQuests) {
-                    var completed = teamData.getCompletedQuests()
-                    console.info('[Quest DEBUG] Completed quests method exists, count: ' + (completed ? completed.size() : 'null'))
-                }
-                if (teamData.isCompleted) {
-                    console.info('[Quest DEBUG] isCompleted method exists')
-                }
-            } catch (eDebug) {
-                console.info('[Quest DEBUG] Error in debug: ' + eDebug)
-            }
-
-            // Verificar se a quest está completa
-            var completed = false
-
-            // Tentar isCompleted com quest object
-            try {
-                completed = teamData.isCompleted(quest)
-                console.info('[Quest DEBUG] isCompleted(quest) = ' + completed + ' for quest ' + questIdHex)
-            } catch (e1) {
-                console.warn('[Quest DEBUG] isCompleted(quest) failed: ' + e1)
-            }
-
-            // Se falhou ou retornou false, tentar com quest ID long
-            if (!completed) {
-                try {
-                    completed = teamData.isCompleted(questIdLong)
-                    console.info('[Quest DEBUG] isCompleted(long) = ' + completed)
-                } catch (e2) {
-                    // Ignorar
-                }
-            }
-
-            // Se ainda false, tentar getProgress
-            if (!completed) {
-                try {
-                    var progress = teamData.getProgress(quest)
-                    var maxProgress = quest.getMaxProgressHex ? quest.getMaxProgressHex() : 1
-                    console.info('[Quest DEBUG] Progress: ' + progress + ' / ' + maxProgress)
-                    completed = progress >= maxProgress
-                } catch (e3) {
-                    // Ignorar
-                }
-            }
-
-            // Cachear resultado
-            questCompletionCache[cacheKey] = completed
-
-            return completed
-        } catch (e) {
-            console.error('[Quest Recipes] Error checking quest: ' + e)
+        if (!teamData) {
             return false
         }
+
+        // Verificar se a quest está completa
+        var completed = false
+
+        try {
+            completed = teamData.isCompleted(quest)
+        } catch (e) { }
+
+        // Cachear resultado
+        questCompletionCache[cacheKey] = completed
+
+        return completed
+    } catch (e) {
+        console.error('[Quest Recipes] Error checking quest: ' + e)
+        return false
     }
+}
 
 // Carregar Long para conversão hex
 var Long = Java.loadClass('java.lang.Long')
 
-    function areAllDepsCompleted(player, deps) {
-        if (!deps || deps.length === 0) return true
+function areAllDepsCompleted(player, deps) {
+    if (!deps || deps.length === 0) return true
 
-        for (var i = 0; i < deps.length; i++) {
-            if (!isQuestCompleted(player, deps[i])) {
-                return false
-            }
+    for (var i = 0; i < deps.length; i++) {
+        if (!isQuestCompleted(player, deps[i])) {
+            return false
         }
-        return true
+    }
+    return true
+}
+
+// ============================================
+// BLOQUEIO DE CRAFT
+// ============================================
+
+ItemEvents.crafted(function (event) {
+    var player = event.player
+    if (!player) return
+
+    var item = event.item
+    if (!item || item.isEmpty()) return
+
+    var itemId = item.getId()
+    var depsList = ITEM_TO_DEPS_LIST[itemId]
+
+    if (!depsList || depsList.length === 0) return // Item não está bloqueado
+
+    // Lógica OR: se QUALQUER conjunto de deps foi completado, permite craft
+    var canCraft = false
+    for (var i = 0; i < depsList.length; i++) {
+        var depsCompleted = areAllDepsCompleted(player, depsList[i])
+        if (depsCompleted) {
+            canCraft = true
+            break
+        }
     }
 
-    // ============================================
-    // BLOQUEIO DE CRAFT
-    // ============================================
+    if (!canCraft) {
+        // ============================================
+        // NOVO COMPORTAMENTO: Devolver ingredientes
+        // ============================================
 
-    ItemEvents.crafted(function (event) {
-        var player = event.player
-        if (!player) return
+        // Captura os ingredientes da matriz de craft
+        // NOTA: O evento crafted dispara APÓS consumo, então capturamos o que resta
+        // e adicionamos +1 para compensar o item consumido
+        var ingredientsToReturn = []
+        try {
+            var matrix = event.inventory
+            if (matrix) {
+                // Tenta obter o tamanho da matriz
+                var matrixSize = 10 // Default: tenta até 10 slots (cobre 3x3 + resultado)
+                try {
+                    if (typeof matrix.getContainerSize === 'function') {
+                        matrixSize = matrix.getContainerSize()
+                    } else if (typeof matrix.size === 'function') {
+                        matrixSize = matrix.size()
+                    } else if (matrix.containerSize) {
+                        matrixSize = matrix.containerSize
+                    }
+                } catch (e) { /* usa default */ }
 
-        var item = event.item
-        if (!item || item.isEmpty()) return
+                // Percorre slots da matriz de craft
+                for (var slot = 0; slot < matrixSize; slot++) {
+                    try {
+                        var slotItem = null
+                        // Tenta diferentes métodos para obter o item
+                        if (typeof matrix.get === 'function') {
+                            slotItem = matrix.get(slot)
+                        } else if (typeof matrix.getItem === 'function') {
+                            slotItem = matrix.getItem(slot)
+                        } else if (typeof matrix.getStackInSlot === 'function') {
+                            slotItem = matrix.getStackInSlot(slot)
+                        }
 
-        var itemId = item.getId()
-        var depsList = ITEM_TO_DEPS_LIST[itemId]
+                        if (slotItem && !slotItem.isEmpty()) {
+                            // Copia o item e adiciona 1 (para compensar o consumido)
+                            var itemCopy = slotItem.copy()
+                            itemCopy.setCount(slotItem.getCount() + 1)
+                            ingredientsToReturn.push(itemCopy)
+                        }
+                    } catch (slotError) {
+                        // Ignora erros de slots individuais
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[Quest Recipes] Could not capture ingredients: ' + e)
+        }
 
-        if (!depsList || depsList.length === 0) return // Item não está bloqueado
+        // Anula o resultado
+        event.item.setCount(0)
 
-        // Lógica OR: se QUALQUER conjunto de deps foi completado, permite craft
-        var canCraft = false
-        for (var i = 0; i < depsList.length; i++) {
-            var depsCompleted = areAllDepsCompleted(player, depsList[i])
-            console.info('[Quest Recipes DEBUG] Item: ' + itemId + ' | Deps set ' + i + ': ' + JSON.stringify(depsList[i]) + ' | Completed: ' + depsCompleted)
-            if (depsCompleted) {
-                canCraft = true
-                break
+        // Remove item do cursor (mouse) se tiver pego
+        var mouseItem = player.getMouseItem()
+        if (mouseItem && mouseItem.getId() == itemId) {
+            player.setMouseItem('air')
+        }
+
+        // Remove do inventário se tiver passado (Shift-Click exploit)
+        player.inventory.clear(itemId)
+
+        // Devolve os ingredientes ao jogador
+        for (var i = 0; i < ingredientsToReturn.length; i++) {
+            try {
+                player.give(ingredientsToReturn[i])
+            } catch (e) {
+                console.warn('[Quest Recipes] Could not return ingredient: ' + e)
             }
         }
 
-        if (!canCraft) {
-            event.item.setCount(0)
-            player.tell(Text.of('§c[Bloqueado] §fComplete as quests anteriores para desbloquear este item!'))
-            // Debug: mostrar quais quests faltam
-            for (var i = 0; i < depsList.length; i++) {
-                for (var j = 0; j < depsList[i].length; j++) {
-                    var questId = depsList[i][j]
-                    var completed = isQuestCompleted(player, questId)
-                    player.tell(Text.of('§7  Quest ' + questId + ': ' + (completed ? '§a✓' : '§c✗')))
+        // Fecha o menu para forçar resync
+        player.closeMenu()
+
+        // Proteção extra: agendar limpeza no próximo tick
+        event.server.scheduleInTicks(1, function (c) {
+            player.inventory.clear(itemId)
+        })
+
+        player.tell(Text.of('§c[Bloqueado] §fComplete as quests anteriores para desbloquear este item!'))
+        player.tell(Text.of('§a[Info] §fSeus ingredientes foram devolvidos.'))
+
+        // Mostrar quais quests faltam (apenas primeira incompleta para não poluir)
+        var shownQuest = false
+        for (var i = 0; i < depsList.length && !shownQuest; i++) {
+            for (var j = 0; j < depsList[i].length; j++) {
+                var questId = depsList[i][j]
+                var completed = isQuestCompleted(player, questId)
+                if (!completed) {
+                    player.tell(Text.of('§7  Quest Pendente: ' + questId))
+                    shownQuest = true
+                    break
                 }
             }
         }
-    })
+    }
+})
 
-    // ============================================
-    // COMANDO DE DEBUG
-    // ============================================
+// ============================================
+// COMANDO DE DEBUG
+// ============================================
 
-    ServerEvents.commandRegistry(function (event) {
-        var Commands = event.commands
-        var StringArgumentType = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType')
+ServerEvents.commandRegistry(function (event) {
+    var Commands = event.commands
+    var StringArgumentType = Java.loadClass('com.mojang.brigadier.arguments.StringArgumentType')
 
-        event.register(
-            Commands.literal('questlock')
-                .requires(function (src) { return src.hasPermission(2) })
+    var questlockNode = Commands.literal('questlock')
+        .requires(function (src) { return src.hasPermission(2) })
 
-                .then(Commands.literal('check')
-                    .then(Commands.argument('questId', StringArgumentType.word())
-                        .executes(function (ctx) {
-                            var source = ctx.getSource()
-                            var player = source.getPlayer()
-                            var questId = StringArgumentType.getString(ctx, 'questId')
+    // Subcomando CHECK
+    var checkNode = Commands.literal('check')
+        .then(Commands.argument('questId', StringArgumentType.word())
+            .executes(function (ctx) {
+                var player = ctx.getSource().getPlayer()
+                var questId = StringArgumentType.getString(ctx, 'questId')
+                if (!player) return 0
+                var completed = isQuestCompleted(player, questId)
+                player.tell(Text.of('§6Quest ' + questId + ': ' + (completed ? '§aCompletada' : '§cNão completada')))
+                return 1
+            }))
 
-                            if (!player) return 0
+    // Subcomando FORCECOMPLETE
+    var forceNode = Commands.literal('forcecomplete')
+        .then(Commands.argument('questId', StringArgumentType.word())
+            .executes(function (ctx) {
+                var player = ctx.getSource().getPlayer()
+                var rawQuestId = StringArgumentType.getString(ctx, 'questId')
+                var questId = rawQuestId.replace('#', '').toUpperCase()
+                if (!player) return 0
 
-                            var completed = isQuestCompleted(player, questId)
-                            player.tell(Text.of('§6Quest ' + questId + ': ' + (completed ? '§aCompletada' : '§cNão completada')))
+                if (!player.persistentData.forced_quests) player.persistentData.forced_quests = []
 
-                            return 1
-                        })
-                    )
-                )
+                var alreadyForced = false
+                player.persistentData.forced_quests.forEach(function (id) {
+                    if (id == questId) alreadyForced = true
+                })
 
-                .then(Commands.literal('item')
-                    .then(Commands.argument('itemId', StringArgumentType.greedyString())
-                        .executes(function (ctx) {
-                            var source = ctx.getSource()
-                            var player = source.getPlayer()
-                            var itemId = StringArgumentType.getString(ctx, 'itemId')
+                if (!alreadyForced) {
+                    player.persistentData.forced_quests.push(questId)
+                    player.tell(Text.of('§a[Sucesso] Quest ' + questId + ' forçada como completa!'))
+                } else {
+                    player.tell(Text.of('§e[Aviso] Quest ' + questId + ' já estava na lista de forçadas.'))
+                }
+                return 1
+            }))
 
-                            if (!player) return 0
+    // Subcomando ITEM (debug)
+    var itemNode = Commands.literal('item')
+        .then(Commands.argument('itemId', StringArgumentType.greedyString())
+            .executes(function (ctx) {
+                var player = ctx.getSource().getPlayer()
+                if (!player) return 0
 
-                            var deps = ITEM_TO_DEPS[itemId]
-                            if (!deps) {
-                                player.tell(Text.of('§7Item não tem restrições de quest'))
-                                return 1
-                            }
+                var itemId = StringArgumentType.getString(ctx, 'itemId')
+                var deps = ITEM_TO_DEPS[itemId]
 
-                            player.tell(Text.of('§6Dependências para §e' + itemId + '§6:'))
-                            for (var i = 0; i < deps.length; i++) {
-                                var completed = isQuestCompleted(player, deps[i])
-                                var status = completed ? '§a✓' : '§c✗'
-                                player.tell(Text.of('  ' + status + ' §7' + deps[i]))
-                            }
+                if (!deps) {
+                    player.tell(Text.of('§7Item ' + itemId + ' não tem restrições.'))
+                    return 1
+                }
 
-                            var canCraft = areAllDepsCompleted(player, deps)
-                            player.tell(Text.of(canCraft ? '§aPode craftar!' : '§cBloqueado'))
+                player.tell(Text.of('§6Dependências de ' + itemId + ':'))
+                // deps é array de arrays (CNF)
+                for (var i = 0; i < deps.length; i++) {
+                    var group = deps[i]
+                    player.tell(Text.of('§eGrupo ' + (i + 1) + ':'))
+                    for (var j = 0; j < group.length; j++) {
+                        var qId = group[j]
+                        var completed = isQuestCompleted(player, qId)
+                        player.tell(Text.of((completed ? '§a [x] ' : '§c [ ] ') + qId))
+                    }
+                }
 
-                            return 1
-                        })
-                    )
-                )
+                return 1
+            }))
 
-                .then(Commands.literal('list')
-                    .executes(function (ctx) {
-                        var source = ctx.getSource()
-                        var player = source.getPlayer()
+    // Registrar subcomandos
+    questlockNode.then(checkNode)
+    questlockNode.then(forceNode)
+    questlockNode.then(itemNode)
 
-                        if (!player) return 0
+    event.register(questlockNode)
 
-                        player.tell(Text.of('§6Total de itens bloqueados: §e' + Object.keys(ITEM_TO_DEPS).length))
-                        return 1
-                    })
-                )
-        )
+    console.info('[Quest Recipes] System loaded with ' + Object.keys(QUEST_DATA).length + ' quest entries')
+    console.info('[Quest Recipes] Total unique items tracked: ~' + totalItems)
+})
 
-        console.info('[Quest Recipes] Commands registered')
-    })
+// ============================================
+// RECIPE REMOVAL - Items that cannot be crafted at all
+// ============================================
+// Crystal Chronicles items - only obtainable as quest rewards
+ServerEvents.recipes(event => {
+    // Remove all recipes from crystal_chronicles mod
+    event.remove({ mod: 'crystal_chronicles' })
+    console.info('[Quest Recipes] Removed all crystal_chronicles recipes - items only available as quest rewards')
 
-    console.info('[Quest Recipes] Dependency-based system loaded with ' + Object.keys(ITEM_TO_DEPS).length + ' items')
+    // Remove all recipes from too_many_bows mod EXCEPT ironclad_bow (which is quest-locked)
+    event.remove({ mod: 'too_many_bows', not: { output: 'too_many_bows:ironclad_bow' } })
+    console.info('[Quest Recipes] Removed too_many_bows recipes (except ironclad_bow) - items only available as quest rewards')
+
+    // Remove all recipes from knightquest mod
+    event.remove({ mod: 'knightquest' })
+    console.info('[Quest Recipes] Removed all knightquest recipes - items only available as quest rewards')
+})
+
+// ============================================
+// AUTO-UNLOCK LISTENER
+// ============================================
+
+FTBQuestsEvents.completed(function (event) {
+    var player = event.player
+    if (!player) return
+
+    // Tenta obter o ID em string (Hex)
+    var quest = event.quest
+    var questId = quest.getCodeString()
+
+    if (!questId) return
+
+    questId = questId.toUpperCase()
+
+    // Inicializa dados se necessário
+    if (!player.persistentData.forced_quests) {
+        player.persistentData.forced_quests = []
+    }
+
+    // Verifica se já está salvo
+    var alreadySaved = false
+    var forced = player.persistentData.forced_quests
+    for (var i = 0; i < forced.length; i++) {
+        if (forced[i] == questId) {
+            alreadySaved = true
+            break
+        }
+    }
+
+    // Salva se não estiver
+    if (!alreadySaved) {
+        player.persistentData.forced_quests.push(questId)
+        console.info('[Quest Recipes] Auto-cached completion for quest: ' + questId + ' (' + player.getName().getString() + ')')
+        // Opcional: Avisar o player que o sistema registrou (pode ser spammy, deixarei apenas log por enquanto)
+    }
+})

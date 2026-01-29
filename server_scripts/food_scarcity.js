@@ -3,7 +3,7 @@
 // Crops near sculk grow slower or die
 
 // ============ CONFIGURATION ============
-var CROP_CHECK_INTERVAL = 600        // Check every 30 seconds
+var CROP_CHECK_CHANCE = 0.00167      // ~0.17% chance each tick (~600 ticks average)
 var SCULK_DETECTION_RADIUS = 8       // How close sculk affects crops
 var ADJACENT_KILL_CHANCE = 0.5       // 50% chance to kill adjacent crops per check
 
@@ -109,7 +109,8 @@ function isSculkNearby(level, pos, radius) {
 
 // ============ CROP GROWTH/DEATH TICK ============
 ServerEvents.tick(function (event) {
-    if (event.server.tickCount % CROP_CHECK_INTERVAL !== 0) return
+    // Probabilistic check instead of fixed interval
+    if (Math.random() > CROP_CHECK_CHANCE) return
 
     event.server.playerList.players.forEach(function (player) {
         if (player.isCreative() || player.isSpectator()) return

@@ -22,12 +22,12 @@ PlayerEvents.inventoryChanged(function (event) {
     }
 })
 
-// Periodic check - remove trial keys every 30 seconds from all players
+// Periodic check - remove trial keys with small chance each tick
 ServerEvents.tick(function (event) {
     let server = event.server
 
-    // Only run every 600 ticks (30 seconds)
-    if (server.tickCount % 600 !== 0) return
+    // ~0.17% chance each tick (equivalent to ~600 ticks average)
+    if (Math.random() > 0.00167) return
 
     server.players.forEach(function (player) {
         let hadKeys = false

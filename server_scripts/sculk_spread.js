@@ -1,6 +1,7 @@
 // Priority: 0
 // File: kubejs/server_scripts/sculk_spread.js
 // Sculk contamination system - CHAIN REACTION: blocks adjacent to sculk get consumed
+// OPTIMIZED: Uses load spreading to prevent lag spikes
 
 // ============ CONFIGURATION ============
 var BASE_CONVERSION_TIME = 3600           // 3 minutes (3600 ticks = 180 seconds)
@@ -9,7 +10,11 @@ var SPREAD_CHECK_RADIUS = 48
 var MIN_Y = -64
 var MAX_Y = 320
 var SAFE_ZONE_Y = 0  // Sculk cannot spread below this Y level (underground is safe!)
-var SPREAD_CHECK_INTERVAL = 20  // Every 1 second - optimized for performance
+
+// LOAD SPREADING CONFIG - Process blocks gradually to prevent lag spikes
+var BLOCKS_PER_TICK = 10                   // Max blocks to process per tick
+var PLAYER_SCAN_CHANCE = 0.05              // 5% chance each tick (~20 ticks average)
+var SAMPLES_PER_PLAYER = 15                // Random positions to sample per player
 
 // ============ BLOCK LISTS ============
 
@@ -185,22 +190,33 @@ function queueAdjacentBlocks(level, x, y, z, currentTick, dimKey) {
     }
 }
 
-// ============ MAIN TICK EVENT ============
+// ============ MAIN TICK EVENT (LOAD SPREADING) ============
 ServerEvents.tick(function (event) {
     var currentTick = event.server.tickCount
+    var server = event.server
 
-    if (currentTick % SPREAD_CHECK_INTERVAL !== 0) return
-
+    // === PART 1: Process pending block conversions (runs EVERY tick) ===
+    // Instead of processing ALL blocks every 20 ticks, process a small batch every tick
     var keysToRemove = []
-    var blocksConverted = []  // Track which blocks were converted to sculk
+    var blocksConverted = []
+    var blocksProcessed = 0
 
-    for (var posKey in spreadingBlocks) {
+    // Get all keys and sort by start time (oldest first)
+    var allKeys = Object.keys(spreadingBlocks)
+
+    for (var i = 0; i < allKeys.length && blocksProcessed < BLOCKS_PER_TICK; i++) {
+        var posKey = allKeys[i]
         var trackData = spreadingBlocks[posKey]
+
+        if (!trackData) continue
+
         var elapsed = currentTick - trackData.startTick
 
+        // Only process blocks that have reached their conversion time
         if (elapsed >= trackData.conversionTime) {
+            blocksProcessed++
+
             try {
-                var server = event.server
                 var targetLevel = server.getLevel(trackData.dim)
                 if (targetLevel) {
                     if (!isChunkLoaded(targetLevel, trackData.x, trackData.z)) {
@@ -241,38 +257,39 @@ ServerEvents.tick(function (event) {
         queueAdjacentBlocks(conv.level, conv.x, conv.y, conv.z, currentTick, conv.dim)
     }
 
-    // STEP 3: SCAN FOR EXISTING BLOCKS adjacent to sculk (not placed by player)
-    // This finds blocks like biomeswevegone:lush_grass_block that already exist
-    var players = event.server.playerList.players
-    for (var p = 0; p < players.size(); p++) {
-        var player = players.get(p)
-        var level = player.level
-        var dimKey = level.dimension.toString()
-        var playerPos = player.blockPosition()
+    // === PART 2: Scan for existing sculk (probabilistic check) ===
+    if (Math.random() < PLAYER_SCAN_CHANCE) {
+        var players = server.playerList.players
+        for (var p = 0; p < players.size(); p++) {
+            var player = players.get(p)
+            var level = player.level
+            var dimKey = level.dimension.toString()
+            var playerPos = player.blockPosition()
 
-        // Sample 15 random positions around the player (optimized from 50)
-        for (var s = 0; s < 15; s++) {
-            var rx = Math.floor((Math.random() * SPREAD_CHECK_RADIUS * 2) - SPREAD_CHECK_RADIUS)
-            var rz = Math.floor((Math.random() * SPREAD_CHECK_RADIUS * 2) - SPREAD_CHECK_RADIUS)
-            var ry = Math.floor((Math.random() * 40) - 20)
+            // Sample random positions around the player
+            for (var s = 0; s < SAMPLES_PER_PLAYER; s++) {
+                var rx = Math.floor((Math.random() * SPREAD_CHECK_RADIUS * 2) - SPREAD_CHECK_RADIUS)
+                var rz = Math.floor((Math.random() * SPREAD_CHECK_RADIUS * 2) - SPREAD_CHECK_RADIUS)
+                var ry = Math.floor((Math.random() * 40) - 20)
 
-            var checkX = playerPos.x + rx
-            var checkY = playerPos.y + ry
-            var checkZ = playerPos.z + rz
+                var checkX = playerPos.x + rx
+                var checkY = playerPos.y + ry
+                var checkZ = playerPos.z + rz
 
-            if (checkY < MIN_Y || checkY > MAX_Y) continue
-            if (!isChunkLoaded(level, checkX, checkZ)) continue
+                if (checkY < MIN_Y || checkY > MAX_Y) continue
+                if (!isChunkLoaded(level, checkX, checkZ)) continue
 
-            // First check if this position has sculk
-            var centerBlock = getBlockSafe(level, checkX, checkY, checkZ)
-            if (!centerBlock || centerBlock.id !== 'minecraft:sculk') continue
+                // First check if this position has sculk
+                var centerBlock = getBlockSafe(level, checkX, checkY, checkZ)
+                if (!centerBlock || centerBlock.id !== 'minecraft:sculk') continue
 
-            // Found a sculk block! Queue all its non-sculk neighbors
-            queueAdjacentBlocks(level, checkX, checkY, checkZ, currentTick, dimKey)
+                // Found a sculk block! Queue all its non-sculk neighbors
+                queueAdjacentBlocks(level, checkX, checkY, checkZ, currentTick, dimKey)
+            }
         }
     }
 
-    // Cleanup stale entries every 5 minutes
+    // === PART 3: Cleanup stale entries (every 5 minutes) ===
     if (currentTick % 6000 === 0) {
         var staleKeys = []
         for (var staleKey in spreadingBlocks) {
@@ -281,8 +298,8 @@ ServerEvents.tick(function (event) {
                 staleKeys.push(staleKey)
             }
         }
-        for (var s = 0; s < staleKeys.length; s++) {
-            delete spreadingBlocks[staleKeys[s]]
+        for (var sk = 0; sk < staleKeys.length; sk++) {
+            delete spreadingBlocks[staleKeys[sk]]
         }
     }
 })

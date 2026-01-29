@@ -23,8 +23,8 @@ PlayerEvents.tick(function (event) {
     var player = event.player
     if (player.isCreative() || player.isSpectator()) return
 
-    // Only run every 10 ticks for performance
-    if (event.server.tickCount % 10 !== 0) return
+    // 10% chance each tick (equivalent to running every ~10 ticks on average)
+    if (Math.random() > 0.1) return
 
     var level = player.level
     var pos = player.blockPosition()
@@ -34,16 +34,26 @@ PlayerEvents.tick(function (event) {
     // Check if standing on any sculk block
     var onSculk = SCULK_BLOCKS.indexOf(blockBelow.id) !== -1 || SCULK_BLOCKS.indexOf(blockAt.id) !== -1
 
-    // Check for Golden Boots
-    var hasGoldenBoots = false
+    // Check for protective boots (Golden Boots, Anti-Radiation Boots, Steampunk Boots)
+    var hasProtectiveBoots = false
     var feetSlotItem = null
+
+    // List of boots that protect from sculk
+    var PROTECTIVE_BOOTS = [
+        'minecraft:golden_boots',
+        'createnuclear:anti_radiation_boots',
+        'immersive_armors:steampunk_boots'
+    ]
 
     // Check armor slot specifically
     var armorSlots = player.inventory.armor
     if (armorSlots && armorSlots.get(0)) {
         feetSlotItem = armorSlots.get(0)
-        if (feetSlotItem.id === 'minecraft:golden_boots') {
-            hasGoldenBoots = true
+        for (var b = 0; b < PROTECTIVE_BOOTS.length; b++) {
+            if (feetSlotItem.id === PROTECTIVE_BOOTS[b]) {
+                hasProtectiveBoots = true
+                break
+            }
         }
     }
 
@@ -51,7 +61,7 @@ PlayerEvents.tick(function (event) {
         // Reset the off-sculk timer since we're on sculk
         player.persistentData.putLong('lastOffSculkTime', 0)
 
-        if (hasGoldenBoots && feetSlotItem) {
+        if (hasProtectiveBoots && feetSlotItem) {
             // Golden Boots Logic: No debuffs, but damage boots
             // Damage boots every 1 second (20 ticks at 10-tick intervals = 2 checks)
             var bootsTimer = player.persistentData.getInt('bootsTimer') || 0

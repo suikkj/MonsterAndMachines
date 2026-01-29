@@ -1,0 +1,11 @@
+// Registro de armaduras customizadas
+// Priority: 0
+
+StartupEvents.registry('item', event => {
+    // Syn Hat - Chapéu customizado como capacete
+    event.create('syn_hat')
+        .displayName('Chapéu do Mnemosyne')
+        .texture('kubejs:item/syn_hat')
+        .maxStackSize(1)
+        .maxDamage(165)
+})
