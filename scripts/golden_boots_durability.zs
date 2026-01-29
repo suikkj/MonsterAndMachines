@@ -16,3 +16,4 @@ import crafttweaker.api.item.IItemStack;
         [<item:minecraft:gold_ingot>, <item:minecraft:air>, <item:minecraft:gold_ingot>]
     ]
 );
+

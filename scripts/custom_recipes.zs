@@ -88,7 +88,7 @@ craftingTable.removeByName("irons_spellbooks:scroll_forge");
 // N C N    (N = Nada, C = Crying Obsidian)
 // C C C
 craftingTable.addShaped("custom_scroll_forge", <item:irons_spellbooks:scroll_forge>, [
-    [<item:hazennstuff:steel_ingot>, <item:hazennstuff:steel_ingot>, <item:hazennstuff:steel_ingot>],
+    [<item:block_factorys_bosses:ancient_iron_ingot>, <item:block_factorys_bosses:ancient_iron_ingot>, <item:block_factorys_bosses:ancient_iron_ingot>],
     [<item:minecraft:air>, <item:minecraft:crying_obsidian>, <item:minecraft:air>],
     [<item:minecraft:crying_obsidian>, <item:minecraft:crying_obsidian>, <item:minecraft:crying_obsidian>]
 ]);
@@ -247,4 +247,70 @@ craftingTable.addShaped("custom_diamond_spell_book", <item:irons_spellbooks:diam
     [<item:minecraft:diamond>, <item:irons_spellbooks:magic_cloth>, <item:irons_spellbooks:magic_cloth>],
     [<item:cataclysm:cursium_ingot>, <item:minecraft:enchanted_book>, <item:cataclysm:cursium_ingot>],
     [<item:minecraft:diamond>, <item:irons_spellbooks:magic_cloth>, <item:irons_spellbooks:magic_cloth>]
+]);
+
+// ============================================
+// Graphene Coated Iron Ingot - Cyberspace
+// Troca Iron Ingot por Steel Ingot
+// ============================================
+
+// Remove a receita original do Graphene Coated Iron Ingot
+craftingTable.remove(<item:cyberspace:graphene_coated_iron_ingot>);
+
+// Adiciona a nova receita com Steel Ingot
+// Layout da receita:
+// N G N    (N = Nada, G = Graphene)
+// G S G    (S = Steel Ingot)
+// N G N
+craftingTable.addShaped("custom_graphene_coated_iron_ingot", <item:cyberspace:graphene_coated_iron_ingot>, [
+    [<item:minecraft:air>, <item:cyberspace:graphene>, <item:minecraft:air>],
+    [<item:cyberspace:graphene>, <item:immersiveengineering:ingot_steel>, <item:cyberspace:graphene>],
+    [<item:minecraft:air>, <item:cyberspace:graphene>, <item:minecraft:air>]
+]);
+
+// ============================================
+// Divine Pearl - Iron's Spellbooks
+// Troca Amethyst Shard por Arcane Essence
+// ============================================
+
+// Remove a receita original do Divine Pearl
+craftingTable.removeByName("irons_spellbooks:divine_pearl");
+
+// Adiciona a nova receita
+// Layout: Gold Ingot + Arcane Essence = Divine Pearl
+craftingTable.addShapeless("custom_divine_pearl", <item:irons_spellbooks:divine_pearl>, [
+    <item:minecraft:gold_ingot>,
+    <item:irons_spellbooks:arcane_essence>
+]);
+
+// ============================================
+// Lightning Bottle - Iron's Spellbooks
+// Crafting customizado com Arcane Ingot, Glass e Mithril Scrap
+// ============================================
+
+// Layout da receita:
+// N A N    (N = Nada, A = Arcane Ingot)
+// G M G    (G = Glass, M = Mithril Scrap)
+// N G N
+craftingTable.addShaped("custom_lightning_bottle", <item:irons_spellbooks:lightning_bottle> * 4, [
+    [<item:minecraft:air>, <item:irons_spellbooks:arcane_ingot>, <item:minecraft:air>],
+    [<item:minecraft:glass>, <item:irons_spellbooks:mithril_scrap>, <item:minecraft:glass>],
+    [<item:minecraft:air>, <item:minecraft:glass>, <item:minecraft:air>]
+]);
+
+// ============================================
+// Soundproof Glass - Deeper and Darker
+// O R O    (O = Overcharged Diamond, R = Reactor Glass)
+// R A R    (A = Arcane Ingot)
+// O R O
+// ============================================
+
+// Remove a receita original do Soundproof Glass
+craftingTable.remove(<item:deeperdarker:soundproof_glass>);
+
+// Adiciona a nova receita
+craftingTable.addShaped("custom_soundproof_glass", <item:deeperdarker:soundproof_glass> * 8, [
+    [<item:create_new_age:overcharged_diamond>, <item:create_new_age:reactor_glass>, <item:create_new_age:overcharged_diamond>],
+    [<item:create_new_age:reactor_glass>, <item:irons_spellbooks:arcane_ingot>, <item:create_new_age:reactor_glass>],
+    [<item:create_new_age:overcharged_diamond>, <item:create_new_age:reactor_glass>, <item:create_new_age:overcharged_diamond>]
 ]);
