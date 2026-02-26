@@ -29,13 +29,13 @@ var SLOT_NAMES = ['feet', 'legs', 'chest', 'head']
 
 // Verifica com 5% de chance cada tick (~20 ticks em média)
 PlayerEvents.tick(function (event) {
-    // 5% chance cada tick
-    if (Math.random() > 0.05) return
-
     var player = event.player
 
     // Ignora jogadores em modo criativo ou spectator
     if (player.isCreative() || player.isSpectator()) return
+
+    // Verifica a cada segundo (20 ticks) - determinístico
+    if (player.age % 20 !== 0) return
 
     // Acessa os slots de armadura via inventory.armor
     var armorSlots = player.inventory.armor

@@ -19,6 +19,19 @@ LootJS.modifiers(function (event) {
         .removeLoot(/^more_relics:.*/)
         .removeLoot(/^morerelics:.*/)
 
-    console.info('[Loot Removal] Configured: mimic/relics loot removal')
+    // Sculk Transporting blocks drop nothing when broken
+    event.addBlockModifier('sculktransporting:sculk_transmitter')
+        .removeLoot(/.*/)
+
+    event.addBlockModifier('sculktransporting:sculk_emitter')
+        .removeLoot(/.*/)
+
+    event.addBlockModifier('mem_sculkapocalypse:void_cleaner')
+        .removeLoot(/.*/)
+
+    event.addBlockModifier('mem_sculkapocalypse:void_amplifier')
+        .removeLoot(/.*/)
+
+    console.info('[Loot Removal] Configured: mimic/relics loot removal + sculk transporting no-drop')
 })
 

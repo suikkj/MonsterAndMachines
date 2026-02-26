@@ -254,20 +254,4 @@ PlayerEvents.loggedIn(function (event) {
     }
 })
 
-// ============ DIMENSION CHANGE EVENT ============
-// Reset exposure when player leaves Otherside
-PlayerEvents.tick(function (event) {
-    // This runs every tick per player - we use it for more responsive dimension detection
-    // But only do the heavy lifting every second
-    var player = event.player
-    if (!player) return
 
-    var currentTick = event.server.tickCount
-    if (currentTick % 20 !== 0) return
-
-    var uuid = getPlayerUUID(player)
-    if (!uuid) return
-
-    // If player just left Otherside, their data will be cleaned up in the main tick
-    // No additional handling needed here
-})

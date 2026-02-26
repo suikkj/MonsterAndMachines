@@ -562,8 +562,9 @@ ServerEvents.commandRegistry(function (event) {
 })
 
 // ============================================
-// PENALIDADE DE ARMA - WEAKNESS QUANDO SEGURA ARMA SEM PROFICIÊNCIA
+// PENALIDADES UNIFICADAS - ARMA, ARMADURA E ESCUDO
 // ============================================
+// Consolidado em um único handler para reduzir overhead de tick events
 
 PlayerEvents.tick(function (event) {
     var player = event.player
@@ -571,34 +572,24 @@ PlayerEvents.tick(function (event) {
     // Verifica a cada segundo (20 ticks)
     if (player.age % 20 !== 0) return
 
+    var playerName = player.getName().getString()
+
+    // === PENALIDADE DE ARMA - WEAKNESS QUANDO SEGURA ARMA SEM PROFICIÊNCIA ===
     var mainHand = player.getMainHandItem()
-    if (!mainHand || mainHand.isEmpty()) return
+    if (mainHand && !mainHand.isEmpty()) {
+        var weaponItemId = mainHand.getId()
+        var weaponCategory = getWeaponCategory(weaponItemId)
 
-    var itemId = mainHand.getId()
-    var weaponCategory = getWeaponCategory(itemId)
-
-    if (!weaponCategory) return // Não é uma arma registrada
-
-    var playerName = player.getName().getString()
-    var hasProficiency = hasWeaponProficiency(playerName, itemId)
-
-    if (!hasProficiency) {
-        // Aplica Weakness 255 por 3 segundos (60 ticks)
-        player.potionEffects.add('minecraft:weakness', 60, 255, false, false)
+        if (weaponCategory) {
+            var hasWeaponProf = hasWeaponProficiency(playerName, weaponItemId)
+            if (!hasWeaponProf) {
+                // Aplica Weakness 255 por 3 segundos (60 ticks)
+                player.potionEffects.add('minecraft:weakness', 60, 255, false, false)
+            }
+        }
     }
-})
 
-// ============================================
-// PENALIDADE DE ARMADURA - REMOVE SE NÃO TEM PROFICIÊNCIA
-// ============================================
-
-PlayerEvents.tick(function (event) {
-    var player = event.player
-
-    // Verifica a cada segundo (20 ticks)
-    if (player.age % 20 !== 0) return
-
-    var playerName = player.getName().getString()
+    // === PENALIDADE DE ARMADURA - REMOVE SE NÃO TEM PROFICIÊNCIA ===
     var EquipmentSlot = Java.loadClass('net.minecraft.world.entity.EquipmentSlot')
 
     var slots = [
@@ -614,47 +605,36 @@ PlayerEvents.tick(function (event) {
 
         if (!armor || armor.isEmpty()) continue
 
-        var itemId = armor.getId()
-        var armorCategory = getArmorCategory(itemId)
+        var armorItemId = armor.getId()
+        var armorCategory = getArmorCategory(armorItemId)
 
         if (!armorCategory) continue // Não é uma armadura registrada
 
-        var hasProficiency = hasArmorProficiency(playerName, itemId)
+        var hasArmorProf = hasArmorProficiency(playerName, armorItemId)
 
-        if (!hasProficiency) {
-            console.info('[Proficiency] Removing armor ' + itemId + ' from ' + playerName)
+        if (!hasArmorProf) {
+            console.info('[Proficiency] Removing armor ' + armorItemId + ' from ' + playerName)
             player.tell(Text.of('§c[Proficiência] §fVocê não tem proficiência para usar esta armadura!'))
             player.give(armor.copy())
             player.setItemSlot(slotInfo.slot, Item.of('minecraft:air'))
         }
     }
-})
 
-// ============================================
-// PENALIDADE DE ESCUDO - SLOWNESS + MINING FATIGUE QUANDO EQUIPADO SEM PROFICIÊNCIA
-// ============================================
-
-PlayerEvents.tick(function (event) {
-    var player = event.player
-
-    // Verifica a cada segundo (20 ticks)
-    if (player.age % 20 !== 0) return
-
-    // Verifica offhand (onde escudos normalmente ficam)
+    // === PENALIDADE DE ESCUDO - SLOWNESS + MINING FATIGUE QUANDO EQUIPADO SEM PROFICIÊNCIA ===
     var offhand = player.getOffHandItem()
-    if (!offhand || offhand.isEmpty()) return
+    if (offhand && !offhand.isEmpty()) {
+        var shieldItemId = offhand.getId()
+        if (isShield(shieldItemId)) {
+            var hasShieldProf = hasShieldProficiency(playerName)
 
-    var itemId = offhand.getId()
-    if (!isShield(itemId)) return
-
-    var playerName = player.getName().getString()
-    var hasProficiency = hasShieldProficiency(playerName)
-
-    if (!hasProficiency) {
-        // Aplica Slowness e Mining Fatigue enquanto segura o escudo
-        player.potionEffects.add('minecraft:slowness', 60, 2, false, false)
-        player.potionEffects.add('minecraft:mining_fatigue', 60, 2, false, false)
+            if (!hasShieldProf) {
+                // Aplica Slowness e Mining Fatigue enquanto segura o escudo
+                player.potionEffects.add('minecraft:slowness', 60, 2, false, false)
+                player.potionEffects.add('minecraft:mining_fatigue', 60, 2, false, false)
+            }
+        }
     }
 })
+
 
 console.info('[Proficiency] System loaded - Using player names for proficiency lookup')

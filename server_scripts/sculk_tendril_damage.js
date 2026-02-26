@@ -17,8 +17,8 @@ PlayerEvents.tick(function (event) {
     var player = event.player
     if (player.isCreative() || player.isSpectator()) return
 
-    // Only check every CHECK_INTERVAL ticks
-    if (event.server.tickCount % CHECK_INTERVAL !== 0) return
+    // Only check every CHECK_INTERVAL ticks (distributed per player via player.age)
+    if (player.age % CHECK_INTERVAL !== 0) return
 
     var level = player.level
     var pos = player.blockPosition()

@@ -109,8 +109,10 @@ function isSculkNearby(level, pos, radius) {
 
 // ============ CROP GROWTH/DEATH TICK ============
 ServerEvents.tick(function (event) {
-    // Probabilistic check instead of fixed interval
-    if (Math.random() > CROP_CHECK_CHANCE) return
+    var currentTick = event.server.tickCount
+
+    // Verifica a cada 600 ticks (~30 segundos) - determinístico
+    if (currentTick % 600 !== 0) return
 
     event.server.playerList.players.forEach(function (player) {
         if (player.isCreative() || player.isSpectator()) return
@@ -118,35 +120,36 @@ ServerEvents.tick(function (event) {
         var level = player.level
         var playerPos = player.blockPosition()
 
-        // Scan for crops near player
-        for (var x = -32; x <= 32; x += 2) {
-            for (var z = -32; z <= 32; z += 2) {
-                for (var y = -4; y <= 4; y++) {
-                    var checkPos = playerPos.offset(x, y, z)
-                    var block = level.getBlock(checkPos)
-                    var blockId = block.id
+        // Amostragem aleatória: verifica 15 posições aleatórias ao redor do jogador
+        // Em vez de iterar 32×32×8 = ~8000 blocos
+        var SAMPLES = 15
+        for (var s = 0; s < SAMPLES; s++) {
+            var rx = Math.floor((Math.random() * 64) - 32)
+            var rz = Math.floor((Math.random() * 64) - 32)
+            var ry = Math.floor((Math.random() * 8) - 4)
 
-                    if (!isCrop(blockId)) continue
+            var checkPos = playerPos.offset(rx, ry, rz)
+            var block = level.getBlock(checkPos)
+            var blockId = block.id
 
-                    var sculkDistance = isSculkNearby(level, checkPos, SCULK_DETECTION_RADIUS)
+            if (!isCrop(blockId)) continue
 
-                    if (sculkDistance === -1) continue  // No sculk nearby
+            var sculkDistance = isSculkNearby(level, checkPos, SCULK_DETECTION_RADIUS)
 
-                    if (sculkDistance <= 1) {
-                        // ADJACENT to sculk - chance to die
-                        if (Math.random() < ADJACENT_KILL_CHANCE) {
-                            level.setBlockAndUpdate(checkPos, Block.getBlock('minecraft:dead_bush').defaultBlockState())
-                        }
-                    } else if (sculkDistance <= 4) {
-                        // CLOSE to sculk - small chance crops wither
-                        // Simplified: just a small chance to kill instead of complex age manipulation
-                        if (Math.random() < 0.1) {
-                            level.setBlockAndUpdate(checkPos, Block.getBlock('minecraft:dead_bush').defaultBlockState())
-                        }
-                    }
-                    // sculkDistance 5-8 = normal growth (no effect)
+            if (sculkDistance === -1) continue  // No sculk nearby
+
+            if (sculkDistance <= 1) {
+                // ADJACENT to sculk - chance to die
+                if (Math.random() < ADJACENT_KILL_CHANCE) {
+                    level.setBlockAndUpdate(checkPos, Block.getBlock('minecraft:dead_bush').defaultBlockState())
+                }
+            } else if (sculkDistance <= 4) {
+                // CLOSE to sculk - small chance crops wither
+                if (Math.random() < 0.1) {
+                    level.setBlockAndUpdate(checkPos, Block.getBlock('minecraft:dead_bush').defaultBlockState())
                 }
             }
+            // sculkDistance 5-8 = normal growth (no effect)
         }
     })
 })

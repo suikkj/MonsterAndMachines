@@ -1652,7 +1652,7 @@ ServerEvents.commandRegistry(function (event) {
     event.register(questlockNode)
 
     console.info('[Quest Recipes] System loaded with ' + Object.keys(QUEST_DATA).length + ' quest entries')
-    console.info('[Quest Recipes] Total unique items tracked: ~' + totalItems)
+    console.info('[Quest Recipes] Total unique items tracked: ' + Object.keys(ITEM_TO_DEPS).length)
 })
 
 // ============================================

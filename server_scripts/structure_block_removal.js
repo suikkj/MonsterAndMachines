@@ -5,8 +5,8 @@
 PlayerEvents.tick(function (event) {
     var player = event.player
 
-    // 0.5% chance cada tick (~200 ticks em média para economizar CPU)
-    if (Math.random() > 0.005) return
+    // Verifica a cada 200 ticks (~10 segundos) - determinístico
+    if (player.age % 200 !== 0) return
 
     var level = player.level
     var pos = player.blockPosition()

@@ -1,7 +1,7 @@
 // Priority: 0
 // File: kubejs/server_scripts/sculk_spread.js
 // Sculk contamination system - CHAIN REACTION: blocks adjacent to sculk get consumed
-// OPTIMIZED: Uses load spreading to prevent lag spikes
+// OPTIMIZED: Uses load spreading and hashmap lookups to prevent lag
 
 // ============ CONFIGURATION ============
 var BASE_CONVERSION_TIME = 3600           // 3 minutes (3600 ticks = 180 seconds)
@@ -9,77 +9,69 @@ var GLOOMY_SCULK_CONVERSION_TIME = 36000  // 30 minutes for gloomy_sculk specifi
 var SPREAD_CHECK_RADIUS = 48
 var MIN_Y = -64
 var MAX_Y = 320
-var SAFE_ZONE_Y = 0  // Sculk cannot spread below this Y level (underground is safe!)
+var SAFE_ZONE_Y = -12  // Sculk cannot spread below this Y level (underground is safe!)
 
 // LOAD SPREADING CONFIG - Process blocks gradually to prevent lag spikes
 var BLOCKS_PER_TICK = 10                   // Max blocks to process per tick
-var PLAYER_SCAN_CHANCE = 0.05              // 5% chance each tick (~20 ticks average)
+var PLAYER_SCAN_INTERVAL = 20              // Scan every 20 ticks (deterministic)
 var SAMPLES_PER_PLAYER = 15                // Random positions to sample per player
 
-// ============ BLOCK LISTS ============
+// ============ BLOCK LISTS (HASHMAP for O(1) lookup) ============
+// Converted from arrays to objects for instant lookup instead of linear search
 
-var IMMUNE_BLOCKS = [
-    'minecraft:bedrock',
-    'minecraft:barrier',
-    'minecraft:command_block',
-    'minecraft:chain_command_block',
-    'minecraft:repeating_command_block',
-    'minecraft:structure_block',
-    'minecraft:structure_void',
-    'minecraft:jigsaw',
-    'minecraft:end_portal_frame',
-    'minecraft:end_portal',
-    'minecraft:nether_portal',
-    'minecraft:spawner',
-    'minecraft:sculk',
-    'minecraft:sculk_vein',
-    'minecraft:sculk_catalyst',
-    'minecraft:sculk_sensor',
-    'minecraft:sculk_shrieker',
-    'minecraft:gold_block',
-    'minecraft:gold_ore',
-    'minecraft:deepslate_gold_ore',
-    'minecraft:raw_gold_block',
-    'minecraft:gilded_blackstone',
-    'deeperdarker:gloomy_sculk'
-]
+var IMMUNE_BLOCKS = {
+    'minecraft:bedrock': true,
+    'minecraft:barrier': true,
+    'minecraft:command_block': true,
+    'minecraft:chain_command_block': true,
+    'minecraft:repeating_command_block': true,
+    'minecraft:structure_block': true,
+    'minecraft:structure_void': true,
+    'minecraft:jigsaw': true,
+    'minecraft:end_portal_frame': true,
+    'minecraft:end_portal': true,
+    'minecraft:nether_portal': true,
+    'minecraft:spawner': true,
+    'minecraft:sculk': true,
+    'minecraft:sculk_vein': true,
+    'minecraft:sculk_catalyst': true,
+    'minecraft:sculk_sensor': true,
+    'minecraft:sculk_shrieker': true,
+    'minecraft:gold_block': true,
+    'minecraft:gold_ore': true,
+    'minecraft:deepslate_gold_ore': true,
+    'minecraft:raw_gold_block': true,
+    'minecraft:gilded_blackstone': true,
+    'deeperdarker:gloomy_sculk': true,
+    'mem_sculkapocalypse:void_cleaner': true,
+    'mem_sculkapocalypse:void_amplifier': true
+}
 
-var SKIP_BLOCKS = [
-    'minecraft:air',
-    'minecraft:cave_air',
-    'minecraft:void_air',
-    'minecraft:water',
-    'minecraft:lava'
-]
+var SKIP_BLOCKS = {
+    'minecraft:air': true,
+    'minecraft:cave_air': true,
+    'minecraft:void_air': true,
+    'minecraft:water': true,
+    'minecraft:lava': true
+}
 
-// Containers are now IMMUNE to sculk (not just dropping contents)
+// Keywords for container immunity (still needs string search)
 var IMMUNE_CONTAINER_KEYWORDS = [
     'chest', 'barrel', 'shulker', 'hopper', 'crate',
     'backpack', 'sophisticatedstorage', 'sophisticatedbackpacks'
 ]
 
-// ============ HELPER FUNCTIONS ============
-
-function getConversionTime(level) {
-    // Always 3 minutes, day or night
-    return BASE_CONVERSION_TIME
-}
-
 function isImmune(blockId) {
     if (!blockId) return true
-    for (var i = 0; i < IMMUNE_BLOCKS.length; i++) {
-        if (blockId === IMMUNE_BLOCKS[i]) return true
-    }
-    if (blockId.toLowerCase().indexOf('gold') !== -1) return true
+    if (IMMUNE_BLOCKS[blockId]) return true
+    // Check for gold in the name (covers modded gold blocks)
+    if (blockId.indexOf('gold') !== -1) return true
     return false
 }
 
 function shouldSkip(blockId) {
     if (!blockId) return true
-    for (var i = 0; i < SKIP_BLOCKS.length; i++) {
-        if (blockId === SKIP_BLOCKS[i]) return true
-    }
-    return false
+    return !!SKIP_BLOCKS[blockId]
 }
 
 function isImmuneContainer(blockId) {
@@ -116,23 +108,31 @@ function getBlockSafe(level, x, y, z) {
     }
 }
 
-function dropContainerContents(level, pos, block) {
-    try {
-        var blockEntity = level.getBlockEntity(pos)
-        if (blockEntity && blockEntity.inventory) {
-            var inv = blockEntity.inventory
-            for (var i = 0; i < inv.size(); i++) {
-                var stack = inv.getStackInSlot(i)
-                if (!stack.isEmpty()) {
-                    block.popItem(stack)
-                }
-            }
-        }
-    } catch (e) { }
+// dropContainerContents removed - containers are now immune to sculk
+
+// ============ EMITTER ZONE CHECK ============
+// Checks if a sculk_emitter is within radius 12 of a position (blocks spread)
+var EMITTER_CHECK_ID = 'mem_sculkapocalypse:void_cleaner'
+var EMITTER_CHECK_RADIUS = 12
+
+function isBlockedByEmitter(level, x, y, z) {
+    // Scan for emitter blocks in a quick pattern (not full cube scan for performance)
+    // Check at several random positions within the radius
+    for (var s = 0; s < 12; s++) {
+        var rx = Math.floor((Math.random() * EMITTER_CHECK_RADIUS * 2 + 1) - EMITTER_CHECK_RADIUS)
+        var ry = Math.floor((Math.random() * EMITTER_CHECK_RADIUS * 2 + 1) - EMITTER_CHECK_RADIUS)
+        var rz = Math.floor((Math.random() * EMITTER_CHECK_RADIUS * 2 + 1) - EMITTER_CHECK_RADIUS)
+        try {
+            var block = level.getBlock(x + rx, y + ry, z + rz)
+            if (block && block.id === EMITTER_CHECK_ID) return true
+        } catch (e) { }
+    }
+    return false
 }
 
 // ============ SPREADING BLOCKS STORAGE ============
 var spreadingBlocks = {}
+var spreadDebugStats = { queued: 0, converted: 0, scanned: 0, lastLogTick: 0 }
 
 // ============ QUEUE ADJACENT BLOCKS FOR CONVERSION ============
 // This is the KEY function - when a block becomes sculk, 
@@ -144,7 +144,7 @@ function queueAdjacentBlocks(level, x, y, z, currentTick, dimKey) {
         [0, 0, 1], [0, 0, -1]    // South, North
     ]
 
-    var conversionTime = getConversionTime(level)
+    var conversionTime = BASE_CONVERSION_TIME
 
     for (var i = 0; i < offsets.length; i++) {
         var o = offsets[i]
@@ -167,6 +167,9 @@ function queueAdjacentBlocks(level, x, y, z, currentTick, dimKey) {
         if (isImmune(blockId)) continue
         if (isSculk(blockId)) continue
         if (isImmuneContainer(blockId)) continue  // Chests, barrels, backpacks are immune
+
+        // EMITTER ZONE: Don't spread into emitter safe zones
+        if (isBlockedByEmitter(level, nx, ny, nz)) continue
 
         var posKey = dimKey + ':' + nx + ',' + ny + ',' + nz
 
@@ -195,17 +198,27 @@ ServerEvents.tick(function (event) {
     var currentTick = event.server.tickCount
     var server = event.server
 
+    // === DEBUG LOG every 5 seconds (100 ticks) ===
+    if (currentTick - spreadDebugStats.lastLogTick >= 100) {
+        var queueSize = 0
+        for (var k in spreadingBlocks) queueSize++
+        console.info('[SculkSpread-KJS] Tick=' + currentTick + ' | QueueSize=' + queueSize + ' | Queued=' + spreadDebugStats.queued + ' | Converted=' + spreadDebugStats.converted + ' | Scanned=' + spreadDebugStats.scanned)
+        spreadDebugStats.queued = 0
+        spreadDebugStats.converted = 0
+        spreadDebugStats.scanned = 0
+        spreadDebugStats.lastLogTick = currentTick
+    }
+
+
     // === PART 1: Process pending block conversions (runs EVERY tick) ===
-    // Instead of processing ALL blocks every 20 ticks, process a small batch every tick
+    // Process a small batch every tick to spread the load
     var keysToRemove = []
     var blocksConverted = []
     var blocksProcessed = 0
 
-    // Get all keys and sort by start time (oldest first)
-    var allKeys = Object.keys(spreadingBlocks)
-
-    for (var i = 0; i < allKeys.length && blocksProcessed < BLOCKS_PER_TICK; i++) {
-        var posKey = allKeys[i]
+    // Use for-in instead of Object.keys() to avoid creating a new array every tick
+    for (var posKey in spreadingBlocks) {
+        if (blocksProcessed >= BLOCKS_PER_TICK) break
         var trackData = spreadingBlocks[posKey]
 
         if (!trackData) continue
@@ -227,8 +240,9 @@ ServerEvents.tick(function (event) {
                     var block = getBlockSafe(targetLevel, trackData.x, trackData.y, trackData.z)
                     if (block) {
                         var blockId = block.id
-                        if (!shouldSkip(blockId) && !isSculk(blockId) && !isImmune(blockId) && !isImmuneContainer(blockId)) {
+                        if (!shouldSkip(blockId) && !isSculk(blockId) && !isImmune(blockId) && !isImmuneContainer(blockId) && !isBlockedByEmitter(targetLevel, trackData.x, trackData.y, trackData.z)) {
                             block.set('minecraft:sculk')
+                            spreadDebugStats.converted++
 
                             // CHAIN REACTION: Queue neighbors for conversion!
                             blocksConverted.push({
@@ -257,8 +271,8 @@ ServerEvents.tick(function (event) {
         queueAdjacentBlocks(conv.level, conv.x, conv.y, conv.z, currentTick, conv.dim)
     }
 
-    // === PART 2: Scan for existing sculk (probabilistic check) ===
-    if (Math.random() < PLAYER_SCAN_CHANCE) {
+    // === PART 2: Scan for existing sculk (deterministic interval) ===
+    if (currentTick % PLAYER_SCAN_INTERVAL === 0) {
         var players = server.playerList.players
         for (var p = 0; p < players.size(); p++) {
             var player = players.get(p)
@@ -284,6 +298,7 @@ ServerEvents.tick(function (event) {
                 if (!centerBlock || centerBlock.id !== 'minecraft:sculk') continue
 
                 // Found a sculk block! Queue all its non-sculk neighbors
+                spreadDebugStats.scanned++
                 queueAdjacentBlocks(level, checkX, checkY, checkZ, currentTick, dimKey)
             }
         }
@@ -340,7 +355,7 @@ BlockEvents.placed(function (event) {
     var posKey = dimKey + ':' + pos.x + ',' + pos.y + ',' + pos.z
 
     if (!spreadingBlocks[posKey]) {
-        var conversionTime = getConversionTime(level)
+        var conversionTime = BASE_CONVERSION_TIME
         var currentTick = level.server.tickCount
         spreadingBlocks[posKey] = {
             startTick: currentTick,
@@ -352,3 +367,5 @@ BlockEvents.placed(function (event) {
         }
     }
 })
+
+console.info('[SculkSpread-KJS] Script loaded successfully — spread system active')

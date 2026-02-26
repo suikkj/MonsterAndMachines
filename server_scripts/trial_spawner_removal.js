@@ -19,8 +19,8 @@ PlayerEvents.tick(event => {
     // Trial Chambers generate between Y -40 and 30
     if (pos.y > 30) return
 
-    // 50% chance each tick (equivalent to every ~2 ticks on average)
-    if (Math.random() > 0.5) return
+    // Verifica a cada 2 ticks - determinístico
+    if (player.age % 2 !== 0) return
     var tickCount = event.server.tickCount
 
     var level = player.level
