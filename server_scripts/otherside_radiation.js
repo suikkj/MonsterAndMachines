@@ -1,13 +1,13 @@
 // Priority: 0
 // File: kubejs/server_scripts/otherside_radiation.js
 // Otherside Dimension Radiation System
-// Players without anti-radiation protection get radiation after 3 minutes
+// Players without anti-radiation protection get radiation after 20 seconds
 // Anti-radiation armor loses 1 durability every 5 minutes
 
 // ============ CONFIGURATION ============
 var OTHERSIDE_DIMENSION = 'deeperandarker:otherside'
 var RADIATION_EFFECT = 'createnuclear:radiation'
-var EXPOSURE_THRESHOLD_TICKS = 3600      // 3 minutes = 3600 ticks
+var EXPOSURE_THRESHOLD_TICKS = 400       // 20 seconds = 400 ticks
 var ARMOR_DAMAGE_INTERVAL_TICKS = 6000   // 5 minutes = 6000 ticks
 var PLAYER_CHECK_INTERVAL = 20           // Check every 20 ticks (1 second) for efficiency
 
@@ -87,6 +87,7 @@ function hasFullAntiRadiationArmor(player) {
             isValidLeggings(leggingsId) &&
             isValidBoots(bootsId)
     } catch (e) {
+        console.error("[Otherside Radiation] Error checking armor: " + e);
         return false
     }
 }
@@ -100,20 +101,26 @@ function damageArmorPiece(player, slot) {
         else if (slot === 'feet') item = player.feetArmorItem
 
         if (item && !item.isEmpty()) {
-            // Damage the item by 1
-            item.damageValue = item.damageValue + 1
+            var newDamage = item.damageValue + 1
 
             // Check if item should break
-            if (item.damageValue >= item.maxDamage) {
-                // Item breaks - set to empty
+            if (newDamage >= item.maxDamage) {
+                // Item breaks - set slot to empty
                 if (slot === 'head') player.headArmorItem = Item.empty
                 else if (slot === 'chest') player.chestArmorItem = Item.empty
                 else if (slot === 'legs') player.legsArmorItem = Item.empty
                 else if (slot === 'feet') player.feetArmorItem = Item.empty
+            } else {
+                // Apply damage and reatribuir ao slot para garantir persistência
+                item.damageValue = newDamage
+                if (slot === 'head') player.headArmorItem = item
+                else if (slot === 'chest') player.chestArmorItem = item
+                else if (slot === 'legs') player.legsArmorItem = item
+                else if (slot === 'feet') player.feetArmorItem = item
             }
         }
     } catch (e) {
-        // Silently fail if we can't damage the item
+        console.error("[Otherside Radiation] Error damaging piece " + slot + ": " + e);
     }
 }
 
@@ -138,7 +145,7 @@ function damageAllAntiRadiationArmor(player) {
             damageArmorPiece(player, 'feet')
         }
     } catch (e) {
-        // Silently fail
+        console.error("[Otherside Radiation] Error damaging all armor: " + e);
     }
 }
 
@@ -147,15 +154,16 @@ function applyRadiation(player) {
         // Apply radiation effect - duration 600 ticks (30 seconds), amplifier 0
         player.potionEffects.add(RADIATION_EFFECT, 600, 0, false, true)
     } catch (e) {
-        // Silently fail if effect doesn't exist
+        console.error("[Otherside Radiation] Error applying radiation: " + e);
     }
 }
 
 function isInOtherside(player) {
     try {
         var dimKey = player.level.dimension.toString()
-        return dimKey === OTHERSIDE_DIMENSION
+        return dimKey.includes(OTHERSIDE_DIMENSION)
     } catch (e) {
+        console.error("[Otherside Radiation] Error checking dimension: " + e);
         return false
     }
 }
@@ -164,6 +172,7 @@ function getPlayerUUID(player) {
     try {
         return player.uuid.toString()
     } catch (e) {
+        console.error("[Otherside Radiation] Error getting UUID: " + e);
         return null
     }
 }
@@ -177,13 +186,20 @@ ServerEvents.tick(function (event) {
     if (currentTick % PLAYER_CHECK_INTERVAL !== 0) return
 
     var server = event.server
-    var players = server.playerList.players
+    var players = server.players // In 1.20+, server.players is directly iterable
     var activePlayerUUIDs = {}
 
-    for (var p = 0; p < players.size(); p++) {
-        var player = players.get(p)
+    players.forEach(function (player) {
         var uuid = getPlayerUUID(player)
-        if (!uuid) continue
+        if (!uuid) return
+
+        // Players who are immune to radiation
+        var IGNORED_PLAYERS = {
+            "suikkj": true,
+            "_Myos_": true
+        }
+
+        if (IGNORED_PLAYERS[player.username]) return
 
         activePlayerUUIDs[uuid] = true
 
@@ -193,7 +209,7 @@ ServerEvents.tick(function (event) {
             if (playerRadiationData[uuid]) {
                 delete playerRadiationData[uuid]
             }
-            continue
+            return
         }
 
         // Player IS in Otherside
@@ -230,7 +246,7 @@ ServerEvents.tick(function (event) {
                 // Keep applying radiation every check while unprotected
             }
         }
-    }
+    })
 
     // Cleanup data for players who are no longer online
     var uuidsToRemove = []

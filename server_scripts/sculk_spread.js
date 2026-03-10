@@ -4,15 +4,15 @@
 // OPTIMIZED: Uses load spreading and hashmap lookups to prevent lag
 
 // ============ CONFIGURATION ============
-var BASE_CONVERSION_TIME = 3600           // 3 minutes (3600 ticks = 180 seconds)
-var GLOOMY_SCULK_CONVERSION_TIME = 36000  // 30 minutes for gloomy_sculk specifically
+var BASE_CONVERSION_TIME = 1200           // 1 minute (1200 ticks = 60 seconds)
+var GLOOMY_SCULK_CONVERSION_TIME = 3600  // 30 minutes for gloomy_sculk specifically
 var SPREAD_CHECK_RADIUS = 48
 var MIN_Y = -64
 var MAX_Y = 320
-var SAFE_ZONE_Y = -12  // Sculk cannot spread below this Y level (underground is safe!)
+var SAFE_ZONE_Y = -32  // Sculk cannot spread below this Y level (underground is safe!)
 
 // LOAD SPREADING CONFIG - Process blocks gradually to prevent lag spikes
-var BLOCKS_PER_TICK = 10                   // Max blocks to process per tick
+var BLOCKS_PER_TICK = 24                   // Max blocks to process per tick
 var PLAYER_SCAN_INTERVAL = 20              // Scan every 20 ticks (deterministic)
 var SAMPLES_PER_PLAYER = 15                // Random positions to sample per player
 
@@ -43,16 +43,18 @@ var IMMUNE_BLOCKS = {
     'minecraft:raw_gold_block': true,
     'minecraft:gilded_blackstone': true,
     'deeperdarker:gloomy_sculk': true,
-    'mem_sculkapocalypse:void_cleaner': true,
-    'mem_sculkapocalypse:void_amplifier': true
+    'sculktransporting:sculk_emitter': true,
+    'sculktransporting:sculk_transmitter': true,
 }
 
 var SKIP_BLOCKS = {
     'minecraft:air': true,
     'minecraft:cave_air': true,
     'minecraft:void_air': true,
+    'minecraft:light': true,
     'minecraft:water': true,
-    'minecraft:lava': true
+    'minecraft:lava': true,
+    'minecraft:glow_lichen': true,
 }
 
 // Keywords for container immunity (still needs string search)
@@ -66,6 +68,8 @@ function isImmune(blockId) {
     if (IMMUNE_BLOCKS[blockId]) return true
     // Check for gold in the name (covers modded gold blocks)
     if (blockId.indexOf('gold') !== -1) return true
+    // Macaw's Furniture blocks are immune (all 600+ furniture pieces)
+    if (blockId.indexOf('mcwfurnitures') !== -1) return true
     return false
 }
 
@@ -112,7 +116,7 @@ function getBlockSafe(level, x, y, z) {
 
 // ============ EMITTER ZONE CHECK ============
 // Checks if a sculk_emitter is within radius 12 of a position (blocks spread)
-var EMITTER_CHECK_ID = 'mem_sculkapocalypse:void_cleaner'
+var EMITTER_CHECK_ID = 'sculktransporting:sculk_emitter'
 var EMITTER_CHECK_RADIUS = 12
 
 function isBlockedByEmitter(level, x, y, z) {
@@ -128,6 +132,17 @@ function isBlockedByEmitter(level, x, y, z) {
         } catch (e) { }
     }
     return false
+}
+
+// Helper: get level from player list (server.getLevel doesn't accept dimension.toString() format)
+function getSpreadLevel(server, dimKey) {
+    var players = server.playerList.players
+    for (var i = 0; i < players.size(); i++) {
+        if (players.get(i).level.dimension.toString() === dimKey) {
+            return players.get(i).level
+        }
+    }
+    return null
 }
 
 // ============ SPREADING BLOCKS STORAGE ============
@@ -202,7 +217,6 @@ ServerEvents.tick(function (event) {
     if (currentTick - spreadDebugStats.lastLogTick >= 100) {
         var queueSize = 0
         for (var k in spreadingBlocks) queueSize++
-        console.info('[SculkSpread-KJS] Tick=' + currentTick + ' | QueueSize=' + queueSize + ' | Queued=' + spreadDebugStats.queued + ' | Converted=' + spreadDebugStats.converted + ' | Scanned=' + spreadDebugStats.scanned)
         spreadDebugStats.queued = 0
         spreadDebugStats.converted = 0
         spreadDebugStats.scanned = 0
@@ -230,7 +244,7 @@ ServerEvents.tick(function (event) {
             blocksProcessed++
 
             try {
-                var targetLevel = server.getLevel(trackData.dim)
+                var targetLevel = getSpreadLevel(server, trackData.dim)
                 if (targetLevel) {
                     if (!isChunkLoaded(targetLevel, trackData.x, trackData.z)) {
                         keysToRemove.push(posKey)

@@ -18,9 +18,8 @@ var DARKVISION_ALLOWED_PLAYERS = [
     'MonoChroma9696'
 ]
 
-// Duração do efeito em ticks (20 ticks = 1 segundo)
-// 72000 ticks = 1 hora (será reaplicado automaticamente)
-var DARKVISION_DURATION = 72000
+// Duração do efeito em ticks — Integer.MAX_VALUE = infinito (~2 bilhões de ticks)
+var DARKVISION_DURATION = 2147483647
 
 // ============================================
 // HELPER FUNCTIONS

@@ -7,7 +7,18 @@
 // ============ CONFIGURATION ============
 var EMITTER_TICK_INTERVAL = 60       // Process every 3 seconds (60 ticks)
 var EMITTER_RADIUS = 12              // Safe zone radius
-var EMITTER_BLOCK_ID = 'mem_sculkapocalypse:void_cleaner'
+var EMITTER_BLOCK_ID = 'sculktransporting:sculk_emitter'
+
+// Helper: get level from player list (server.getLevel doesn't accept dimension.toString() format)
+function getEmitterLevel(server, dimKey) {
+    var players = server.playerList.players
+    for (var i = 0; i < players.size(); i++) {
+        if (players.get(i).level.dimension.toString() === dimKey) {
+            return players.get(i).level
+        }
+    }
+    return null
+}
 
 // Track active emitters: { "dim:x,y,z": { x, y, z, dim } }
 var activeEmitters = {}
@@ -93,7 +104,7 @@ ServerEvents.tick(function (event) {
         var emitter = activeEmitters[key]
 
         try {
-            var level = server.getLevel(emitter.dim)
+            var level = getEmitterLevel(server, emitter.dim)
             if (!level) {
                 keysToRemove.push(key)
                 continue
@@ -161,7 +172,7 @@ ServerEvents.tick(function (event) {
     for (var key in activeEmitters) {
         var emitter = activeEmitters[key]
         try {
-            var level = event.server.getLevel(emitter.dim)
+            var level = getEmitterLevel(event.server, emitter.dim)
             if (!level) { keysToRemove.push(key); continue }
             var block = level.getBlock(emitter.x, emitter.y, emitter.z)
             if (!block || block.id !== EMITTER_BLOCK_ID) {

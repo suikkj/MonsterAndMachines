@@ -7,4 +7,5 @@ ServerEvents.tags('item', event => {
     // O steel do Immersive Engineering PERMANECE na tag
     event.remove('c:ingots/steel', 'createnuclear:steel_ingot');
     event.remove('c:ingots/steel', 'hazennstuff:steel_ingot');
+    event.remove('c:ingots/steel', 'blocksyouneed_luna:steel_ingot');
 });

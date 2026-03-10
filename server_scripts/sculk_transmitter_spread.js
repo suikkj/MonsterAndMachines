@@ -6,7 +6,7 @@
 // ============ CONFIGURATION ============
 var TRANSMITTER_TICK_INTERVAL = 40     // Process every 2 seconds (40 ticks)
 var TRANSMITTER_RADIUS = 12            // Spread zone radius
-var TRANSMITTER_BLOCK_ID = 'mem_sculkapocalypse:void_amplifier'
+var TRANSMITTER_BLOCK_ID = 'sculktransporting:sculk_transmitter'
 var CONVERSIONS_PER_TICK = 2           // Convert up to 2 blocks per cycle
 
 // Blocks immune to transmitter conversion
@@ -37,7 +37,20 @@ function isImmuneToTransmitter(blockId) {
     // Don't convert other transmitters or emitters
     if (blockId.indexOf('sculktransporting') !== -1) return true
     if (blockId.indexOf('mem_sculkapocalypse') !== -1) return true
+    // Macaw's Furniture blocks are immune
+    if (blockId.indexOf('mcwfurnitures') !== -1) return true
     return false
+}
+
+// Helper: get level from player list (server.getLevel doesn't accept dimension.toString() format)
+function getTransmitterLevel(server, dimKey) {
+    var players = server.playerList.players
+    for (var i = 0; i < players.size(); i++) {
+        if (players.get(i).level.dimension.toString() === dimKey) {
+            return players.get(i).level
+        }
+    }
+    return null
 }
 
 // Track active transmitters: { "dim:x,y,z": { x, y, z, dim } }
@@ -92,7 +105,7 @@ ServerEvents.tick(function (event) {
         var transmitter = activeTransmitters[key]
 
         try {
-            var level = server.getLevel(transmitter.dim)
+            var level = getTransmitterLevel(server, transmitter.dim)
             if (!level) {
                 keysToRemove.push(key)
                 continue
@@ -163,7 +176,7 @@ ServerEvents.tick(function (event) {
     for (var key in activeTransmitters) {
         var t = activeTransmitters[key]
         try {
-            var level = event.server.getLevel(t.dim)
+            var level = getTransmitterLevel(event.server, t.dim)
             if (!level) { keysToRemove.push(key); continue }
             var block = level.getBlock(t.x, t.y, t.z)
             if (!block || block.id !== TRANSMITTER_BLOCK_ID) {

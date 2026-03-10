@@ -29,6 +29,11 @@ var IMMUNE_ITEMS = {
     'minecraft:gold_nugget': true
 }
 
+// Sculk Transformations: { inputItem: { output: 'modid:item', chance: 0.0-1.0 } }
+var SCULK_TRANSFORMATIONS = {
+    'crystal_chronicles:voidstone_shard': { output: 'minecraft:echo_shard', chance: 0.5 }
+}
+
 // ============ TRACKING ============
 // Track contamination time: { entityUUID: startTick }
 var contaminationTracker = {}
@@ -101,6 +106,42 @@ ServerEvents.tick(function (event) {
                 }
 
                 var timeOnSculk = currentTick - contaminationTracker[entityId]
+
+                // ============ SCULK TRANSFORMATION ============
+                // Check if item can be transformed by sculk
+                // Each item in the stack rolls independently (fixes Staaaaaaaaaaaack mod stacking)
+                try {
+                    var itemStack = entity.item
+                    var transformation = SCULK_TRANSFORMATIONS[itemStack.id]
+                    if (transformation && timeOnSculk >= DESTROY_THRESHOLD_TICKS) {
+                        var itemCount = itemStack.count
+                        entity.kill()
+                        delete contaminationTracker[entityId]
+
+                        // Roll each item individually instead of all-or-nothing
+                        var successCount = 0
+                        for (var roll = 0; roll < itemCount; roll++) {
+                            if (Math.random() < transformation.chance) {
+                                successCount++
+                            }
+                        }
+                        var failCount = itemCount - successCount
+
+                        if (successCount > 0) {
+                            // Spawn transformed items (only the ones that succeeded)
+                            server.runCommandSilent('execute in ' + dimKey + ' positioned ' + itemPos.x + ' ' + itemPos.y + ' ' + itemPos.z + ' run summon minecraft:item ~ ~0.5 ~ {Item:{id:"' + transformation.output + '",Count:' + successCount + 'b},PickupDelay:20}')
+                            server.runCommandSilent('execute in ' + dimKey + ' positioned ' + itemPos.x + ' ' + itemPos.y + ' ' + itemPos.z + ' run particle minecraft:sculk_soul ~ ~0.5 ~ 0.2 0.3 0.2 0.02 10 force')
+                            server.runCommandSilent('execute in ' + dimKey + ' positioned ' + itemPos.x + ' ' + itemPos.y + ' ' + itemPos.z + ' run playsound minecraft:block.sculk_catalyst.bloom master @a ~ ~ ~ 0.8 1.2')
+                        }
+
+                        if (failCount > 0) {
+                            // Items consumed by sculk
+                            server.runCommandSilent('execute in ' + dimKey + ' positioned ' + itemPos.x + ' ' + itemPos.y + ' ' + itemPos.z + ' run particle minecraft:smoke ~ ~0.3 ~ 0.2 0.2 0.2 0.01 8 force')
+                            server.runCommandSilent('execute in ' + dimKey + ' positioned ' + itemPos.x + ' ' + itemPos.y + ' ' + itemPos.z + ' run playsound minecraft:block.sculk.break master @a ~ ~ ~ 0.5 0.5')
+                        }
+                        continue
+                    }
+                } catch (ex) { }
 
                 // Stage 2: Destroy after 3 minutes
                 if (timeOnSculk >= DESTROY_THRESHOLD_TICKS) {
