@@ -7,7 +7,7 @@
         "extra_bottom_block_chance": 0.0,
         "extra_edge_column_chance": 0.0,
         "vegetation_chance": 0.0,
-        "xz_radius": 12,
+        "xz_radius": 4,
         "replaceable": "#kubejs:sculk_can_replace",
         "ground_state": {
             "type": "minecraft:simple_state_provider",

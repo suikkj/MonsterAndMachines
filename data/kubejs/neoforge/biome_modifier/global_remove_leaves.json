@@ -4,5 +4,5 @@
     "features": [
         "kubejs:remove_leaves_placed"
     ],
-    "step": "vegetal_decoration"
+    "step": "top_layer_modification"
 }

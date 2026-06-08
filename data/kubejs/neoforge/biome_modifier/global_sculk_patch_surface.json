@@ -14,5 +14,5 @@
         "kubejs:sculk_patch_surface_placed",
         "kubejs:sculk_patch_caves_placed"
     ],
-    "step": "surface_structures"
+    "step": "top_layer_modification"
 }

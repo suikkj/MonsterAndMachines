@@ -14,5 +14,5 @@
         "kubejs:sculk_vein_surface_placed",
         "kubejs:sculk_vein_caves_placed"
     ],
-    "step": "vegetal_decoration"
+    "step": "top_layer_modification"
 }
